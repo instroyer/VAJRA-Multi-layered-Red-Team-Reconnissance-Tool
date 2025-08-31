@@ -1,121 +1,140 @@
-#!/bin/bash
+# Engine/requirements.py
 
-# shortcuts.sh — Signal-based shortcut controller for VAJRA
+import os
+import subprocess
+import sys
+from .menu_logger import Logger
 
-STATUS_FILE="/tmp/vajra_status.flag"
+def check_tool(tool_name):
+    """Check if a tool is installed and available in PATH."""
+    try:
+        # Use 'which' on Linux/macOS, 'where' on Windows
+        if os.name == 'nt':  # Windows
+            result = subprocess.run(['where', tool_name], 
+                                  capture_output=True, text=True, timeout=10)
+        else:  # Linux/macOS
+            result = subprocess.run(['which', tool_name], 
+                                  capture_output=True, text=True, timeout=10)
+        
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
 
-# === Color Codes ===
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-YELLOW="\033[1;33m"
-BLUE="\033[1;34m"
-CYAN="\033[1;36m"
-MAGENTA="\033[1;35m"
-RESET="\033[0m"
+def install_apt_package(package_name):
+    """Install a package using apt (Debian/Ubuntu/Kali)."""
+    try:
+        Logger.info(f"Installing {package_name} via apt...")
+        result = subprocess.run(['sudo', 'apt', 'install', '-y', package_name],
+                              capture_output=True, text=True, timeout=300)
+        return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        Logger.error(f"Timeout installing {package_name}")
+        return False
 
-# === Setup Signal Traps ===
-trap_shortcuts() {
-    trap 'handle_stop' SIGUSR1
-    trap 'handle_kill' SIGUSR2
-    trap 'handle_continue' SIGCONT
-    trap 'handle_resume' SIGWINCH
-    trap 'handle_cancel' SIGTSTP
-    trap 'handle_skip' SIGINT
-    trap 'handle_restart' SIGTERM
-    trap 'handle_quit' SIGHUP
-    trap 'handle_help' SIGUSR3
-}
+def install_go_tool(tool_url):
+    """Install a Go-based tool."""
+    try:
+        Logger.info(f"Installing Go tool: {tool_url}")
+        result = subprocess.run(['go', 'install', '-v', tool_url],
+                              capture_output=True, text=True, timeout=600)
+        return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        Logger.error("Timeout installing Go tool")
+        return False
+    except FileNotFoundError:
+        Logger.error("Go is not installed. Installing Go first...")
+        if install_apt_package('golang-go'):
+            return install_go_tool(tool_url)
+        return False
 
-reset_shortcut_flags() {
-    echo "running" > "$STATUS_FILE"
-}
+def install_eyewitness():
+    """Install EyeWitness tool from GitHub."""
+    try:
+        Logger.info("Installing EyeWitness...")
+        # Clone repository
+        clone_cmd = ['git', 'clone', 'https://github.com/FortyNorthSecurity/EyeWitness.git', '/tmp/EyeWitness']
+        result = subprocess.run(clone_cmd, capture_output=True, text=True, timeout=300)
+        
+        if result.returncode != 0:
+            return False
+        
+        # Run setup script
+        setup_cmd = ['sudo', 'python3', '/tmp/EyeWitness/setup/setup.py']
+        result = subprocess.run(setup_cmd, capture_output=True, text=True, timeout=300)
+        
+        return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        Logger.error("Timeout installing EyeWitness")
+        return False
 
-check_shortcut_status() {
-    [[ ! -f "$STATUS_FILE" ]] && echo "running" > "$STATUS_FILE"
-    STATUS=$(<"$STATUS_FILE")
-    case "$STATUS" in
-        "skip")
-            echo -e "${YELLOW}[!] Module skipped${RESET}"
-            return 1
-            ;;
-        "stop")
-            echo -e "${RED}[!] Module stopped${RESET}"
-            exit 1
-            ;;
-        "kill")
-            echo -e "${RED}[!] Tool terminated${RESET}"
-            exit 2
-            ;;
-        "quit")
-            echo -e "${MAGENTA}[!] Framework exited${RESET}"
-            exit 3
-            ;;
-    esac
-    return 0
-}
+def check_and_install_all():
+    """Check all dependencies and install missing ones."""
+    Logger.info("Checking system dependencies...")
+    
+    # Define all tools and their installation methods
+    dependencies = {
+        'whois': {'type': 'apt', 'package': 'whois'},
+        'nmap': {'type': 'apt', 'package': 'nmap'},
+        'subfinder': {'type': 'go', 'url': 'github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest'},
+        'amass': {'type': 'go', 'url': 'github.com/owasp-amass/amass/v3/...@master'},
+        'httpx': {'type': 'go', 'url': 'github.com/projectdiscovery/httpx/cmd/httpx@latest'},
+        'EyeWitness': {'type': 'custom', 'install_func': install_eyewitness}
+    }
+    
+    missing_tools = []
+    
+    # Check each tool
+    for tool, info in dependencies.items():
+        if check_tool(tool if tool != 'EyeWitness' else 'python3'):
+            Logger.success(f"{tool} is already installed")
+        else:
+            Logger.error(f"{tool} not found")
+            missing_tools.append((tool, info))
+    
+    # If no missing tools, return early
+    if not missing_tools:
+        Logger.success("All dependencies are installed!")
+        return True
+    
+    # Ask user for installation
+    Logger.warning(f"{len(missing_tools)} tools are missing.")
+    choice = input("[?] Would you like to install missing dependencies? (y/n): ").lower().strip()
+    
+    if choice != 'y':
+        Logger.warning("Some modules may not function without missing dependencies.")
+        return False
+    
+    # Install missing tools
+    for tool, info in missing_tools:
+        Logger.info(f"Installing {tool}...")
+        success = False
+        
+        if info['type'] == 'apt':
+            success = install_apt_package(info['package'])
+        elif info['type'] == 'go':
+            success = install_go_tool(info['url'])
+        elif info['type'] == 'custom':
+            success = info['install_func']()
+        
+        if success:
+            Logger.success(f"{tool} installed successfully")
+        else:
+            Logger.error(f"Failed to install {tool}")
+    
+    # Final verification
+    all_installed = True
+    for tool, _ in missing_tools:
+        if not check_tool(tool if tool != 'EyeWitness' else 'python3'):
+            Logger.error(f"{tool} is still not available after installation")
+            all_installed = False
+    
+    if all_installed:
+        Logger.success("All dependencies installed successfully!")
+    else:
+        Logger.warning("Some dependencies may not be fully functional")
+    
+    return all_installed
 
-# === Individual Shortcut Handlers ===
-
-handle_stop() {
-    echo -e "${RED}[!] Module stopped${RESET}"
-    echo "stop" > "$STATUS_FILE"
-}
-
-handle_kill() {
-    echo -e "${RED}[!] Framework killed${RESET}"
-    echo "kill" > "$STATUS_FILE"
-}
-
-handle_continue() {
-    echo -e "${CYAN}[~] Continuing...${RESET}"
-    echo "running" > "$STATUS_FILE"
-}
-
-handle_resume() {
-    echo -e "${CYAN}[~] Resuming skipped task...${RESET}"
-    echo "resume" > "$STATUS_FILE"
-}
-
-handle_cancel() {
-    echo -e "${GREEN}[✔] Action canceled${RESET}"
-    echo "cancel" > "$STATUS_FILE"
-}
-
-handle_skip() {
-    echo -e "${YELLOW}[!] Skipping module...${RESET}"
-    echo "skip" > "$STATUS_FILE"
-}
-
-handle_restart() {
-    echo -e "${BLUE}[~] Restarting module...${RESET}"
-    echo "restart" > "$STATUS_FILE"
-}
-
-handle_quit() {
-    echo -e "${MAGENTA}[!] Exiting VAJRA...${RESET}"
-    echo "quit" > "$STATUS_FILE"
-}
-
-handle_help() {
-    # Full shortcut preview (3-line version with color)
-    echo -e "${CYAN}[+] Shortcut Menu:${RESET}"
-    echo -e "[${RED}1${RESET}] Stop | [${RED}2${RESET}] Kill | [${CYAN}3${RESET}] Continue | [${CYAN}4${RESET}] Resume | [${GREEN}5${RESET}] Cancel"
-    echo -e "[${YELLOW}s${RESET}] Skip | [${BLUE}r${RESET}] Restart | [${MAGENTA}q${RESET}] Quit | [${CYAN}l${RESET}] Logs | [${CYAN}d${RESET}] Debug | [${BLUE}hh${RESET}] Help"
-
-    # Full help table
-    echo -e "\n${CYAN}[+] Shortcut Help — Available Commands${RESET}\n"
-    echo -e "| ${BLUE}Key${RESET} | ${BLUE}Action Description${RESET}        |"
-    echo    "|-----|---------------------------|"
-    echo    "|  1  | Stop current module       |"
-    echo    "|  2  | Kill tool process         |"
-    echo    "|  3  | Continue (default)        |"
-    echo    "|  4  | Resume last skipped task  |"
-    echo    "|  5  | Cancel selection (return) |"
-    echo    "|  s  | Skip current tool         |"
-    echo    "|  r  | Restart this module       |"
-    echo    "|  q  | Quit entire framework     |"
-    echo    "|  l  | Show live log             |"
-    echo    "|  d  | Toggle debug mode         |"
-    echo    "| hh  | Show help (shortcut menu) |"
-    echo ""
-}
+if __name__ == "__main__":
+    # Test the dependency checker
+    check_and_install_all()
