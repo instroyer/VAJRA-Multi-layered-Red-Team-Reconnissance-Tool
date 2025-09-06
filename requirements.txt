@@ -1,0 +1,3 @@
+# Python dependencies for VAJRA
+colorama
+# Add other required Python libraries for your modules or report generation later

@@ -1,22 +1,33 @@
-# Engine/banner.py
+'''
+def display():
+    """Display the VAJRA ASCII banner."""
+    banner_text = """
+    ██╗   ██╗ █████╗ ██╗   ██╗██████╗  █████╗
+    ██║   ██║██╔══██╗██║   ██║██╔══██╗██╔══██╗
+    ██║   ██║███████║██║   ██║██████╔╝███████║
+    ╚██╗ ██╔╝██╔══██║██║   ██║██╔══██╗██╔══██║
+     ╚████╔╝ ██║  ██║╚██████╔╝██║  ██║██║  ██║
+      ╚═══╝  ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+    Multi-layered Red Team Reconnaissance Framework
+    """
+    print(banner_text)
+'''
+# VAJRA Rainbow ASCII Banner
+import colorama
+from colorama import Fore, Style
+
+colorama.init(autoreset=True)
 
 def display_banner():
-    """Prints the VAJRA rainbow banner with owner signature"""
-    banner = """
-\033[38;2;255;0;0m  ██╗░░░██╗░█████╗░░░░░░██╗██████╗░░█████╗░\033[0m
-\033[38;2;255;128;0m██║░░░██║██╔══██╗░░░░░██║██╔══██╗██╔══██╗\033[0m
-\033[38;2;255;255;0m╚██╗░██╔╝███████║░░░░░██║██████╔╝███████║\033[0m
-\033[38;2;128;255;0m░╚████╔╝░██╔══██║██╗░░██║██╔══██╗██╔══██║\033[0m
-\033[38;2;0;255;0m  ░░╚██╔╝░░██║░░██║╚█████╔╝██║░░██║██║░░██║\033[0m
-\033[38;2;0;255;255m░░░╚═╝░░░╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝\033[0m
-\033[38;2;255;105;180m            ＯＷＮＥＲ － ＹＪ     \033[0m
-
-\033[38;2;135;206;250m╔══════════════════════════════════════════════════╗\033[0m
-\033[38;2;255;215;0m  ║   Multi-Layered RED TEAM RECONNISANCE Framework  ║\033[0m
-\033[38;2;135;206;250m╚══════════════════════════════════════════════════╝\033[0m
-"""
+    """Display the VAJRA rainbow ASCII banner."""
+    banner = f"""
+    {Fore.RED}██╗   ██╗ {Fore.YELLOW}█████╗ {Fore.GREEN}██╗   ██╗{Fore.CYAN}██████╗  {Fore.BLUE}█████╗
+    {Fore.RED}██║   ██║{Fore.YELLOW}██╔══██╗{Fore.GREEN}██║   ██║{Fore.CYAN}██╔══██╗{Fore.BLUE}██╔══██╗
+    {Fore.RED}██║   ██║{Fore.YELLOW}███████║{Fore.GREEN}██║   ██║{Fore.CYAN}██████╔╝{Fore.BLUE}███████║
+    {Fore.RED}╚██╗ ██╔╝{Fore.YELLOW}██╔══██║{Fore.GREEN}██║   ██║{Fore.CYAN}██╔══██╗{Fore.BLUE}██╔══██║
+    {Fore.RED} ╚████╔╝ {Fore.YELLOW}██║  ██║{Fore.GREEN}╚██████╔╝{Fore.CYAN}██║  ██║{Fore.BLUE}██║  ██║
+    {Fore.RED}  ╚═══╝  {Fore.YELLOW}╚═╝  ╚═╝ {Fore.GREEN}╚═════╝ {Fore.CYAN}╚═╝  ╚═╝{Fore.BLUE}╚═╝  ╚═╝
+    {Style.BRIGHT}{Fore.MAGENTA}Multi-layered Red Team Reconnaissance Framework
+    {Style.RESET_ALL}
+    """
     print(banner)
-
-# Test the banner
-if __name__ == "__main__":
-    display_banner()
