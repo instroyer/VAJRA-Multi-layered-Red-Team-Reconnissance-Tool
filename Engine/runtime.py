@@ -37,10 +37,14 @@ def runtime_control_listener():
     global control_action
     while not runtime_control_flag.is_set():
         try:
-            if sys.stdin in select.select([sys.stdin], [], [], 0.1)[0]:
+            # Use select with a very short timeout to avoid blocking
+            if sys.stdin in select.select([sys.stdin], [], [], 0.01)[0]:
                 user_input = sys.stdin.readline().strip()
                 if user_input == '00':
                     control_action = 'menu'
+                    # Clear any remaining input buffer
+                    while sys.stdin in select.select([sys.stdin], [], [], 0.01)[0]:
+                        sys.stdin.readline()
                 elif user_input == 'p':
                     control_action = 'pause'
                 elif user_input == 'r':
@@ -53,7 +57,7 @@ def runtime_control_listener():
             break
 
 def show_runtime_menu():
-    """Display the runtime control menu with proper pause handling."""
+    """Display the runtime control menu."""
     menu = """
     ╔══════════════════════════════╗
     ║       Runtime Control        ║
@@ -68,9 +72,8 @@ def show_runtime_menu():
     print(menu)
     
     try:
-        # Show prompt and wait for input without auto-return
-        print("Select action > ", end='', flush=True)
-        choice = input().strip().lower()
+        # Show prompt and wait for input
+        choice = input("Select action > ").strip().lower()
         return choice
         
     except (KeyboardInterrupt, EOFError):
@@ -89,10 +92,10 @@ def handle_paused_state(process, module_name):
             # Check for control actions
             if control_action == 'menu':
                 choice = show_runtime_menu()
+                control_action = None  # Reset after handling
                 if choice == 'r':
                     info(f"Resuming {module_name}...")
                     is_paused = False
-                    control_action = None
                     return True
                 elif choice == 's':
                     info(f"Skipping {module_name}...")
@@ -145,12 +148,13 @@ def execute_command_with_control(command, module_name):
             # Check for control actions
             if control_action == 'menu':
                 choice = show_runtime_menu()
+                control_action = None  # Reset after handling menu
                 if choice == 'p':
                     info(f"Pausing {module_name}...")
                     return handle_paused_state(process, module_name)
                 elif choice == 'r':
                     info(f"Resuming {module_name}...")
-                    control_action = None
+                    # Already running, no need to resume
                 elif choice == 's':
                     info(f"Skipping {module_name}...")
                     process.terminate()
@@ -160,11 +164,12 @@ def execute_command_with_control(command, module_name):
                     process.terminate()
                     sys.exit(0)
                 else:
-                    control_action = None
-                    info(f"Resuming {module_name}...")
+                    info(f"Continuing {module_name}...")
                     
             elif control_action == 'pause':
                 info(f"Pausing {module_name}...")
+                temp_action = control_action
+                control_action = None
                 return handle_paused_state(process, module_name)
                 
             elif control_action == 'quit':
