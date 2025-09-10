@@ -8,7 +8,7 @@ REQUIRED_TOOLS = {
     'whois': 'whois',
     'subfinder': 'subfinder',
     'amass': 'amass',
-    'httpx': 'httpx',
+    'httpx': 'httpx-toolkit',  # Changed from httpx to httpx-toolkit
     'nmap': 'nmap',
     'eyewitness': 'eyewitness'
 }

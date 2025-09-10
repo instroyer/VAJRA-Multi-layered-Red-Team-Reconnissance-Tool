@@ -38,21 +38,21 @@ def runtime_control_listener():
     while not runtime_control_flag.is_set():
         try:
             # Use select with a very short timeout to avoid blocking
-            if sys.stdin in select.select([sys.stdin], [], [], 0.01)[0]:
+            if sys.stdin in select.select([sys.stdin], [], [], 0.1)[0]:
                 user_input = sys.stdin.readline().strip()
-                if user_input == '00':
+                if user_input == '00' and control_action is None:
                     control_action = 'menu'
-                    # Clear any remaining input buffer
-                    while sys.stdin in select.select([sys.stdin], [], [], 0.01)[0]:
-                        sys.stdin.readline()
-                elif user_input == 'p':
+                elif user_input == 'p' and control_action is None:
                     control_action = 'pause'
-                elif user_input == 'r':
+                elif user_input == 'r' and control_action is None:
                     control_action = 'resume'
-                elif user_input == 's':
+                elif user_input == 's' and control_action is None:
                     control_action = 'skip'
-                elif user_input == 'q':
+                elif user_input == 'q' and control_action is None:
                     control_action = 'quit'
+                # Clear input buffer to prevent multiple triggers
+                while sys.stdin in select.select([sys.stdin], [], [], 0.01)[0]:
+                    sys.stdin.readline()
         except:
             break
 
@@ -64,7 +64,7 @@ def show_runtime_menu():
     ╠══════════════════════════════╣
     ║ [p] Pause current module     ║
     ║ [r] Resume paused module     ║
-    ║ [s] Skip to next target      ║
+    ║ [s] Skip current module      ║
     ║ [q] Quit VAJRA entirely      ║
     ║ [any] Return to execution    ║
     ╚══════════════════════════════╝
@@ -72,11 +72,40 @@ def show_runtime_menu():
     print(menu)
     
     try:
-        # Show prompt and wait for input
-        choice = input("Select action > ").strip().lower()
+        # Show prompt and wait for single key + Enter
+        print("Select action > ", end='', flush=True)
+        
+        # Wait for input with 5-second timeout
+        start_time = time.time()
+        input_line = ""
+        
+        while True:
+            if sys.stdin in select.select([sys.stdin], [], [], 0.1)[0]:
+                char = sys.stdin.read(1)
+                if char == '\n':  # Enter pressed
+                    break
+                input_line += char
+                
+                # Only show the first character if multiple are pressed
+                if len(input_line) == 1:
+                    print(f"\rSelect action > {input_line}", end='', flush=True)
+                elif len(input_line) > 1:
+                    # If multiple keys pressed, keep only the first one
+                    input_line = input_line[0]
+                    print(f"\rSelect action > {input_line}", end='', flush=True)
+            
+            # Check timeout
+            if time.time() - start_time > 5:
+                print("\r" + " " * 30 + "\r", end='', flush=True)
+                info("Auto-returning to execution...")
+                return None
+        
+        choice = input_line.strip().lower() if input_line else None
+        print()  # New line after input
         return choice
         
     except (KeyboardInterrupt, EOFError):
+        print("\r" + " " * 30 + "\r", end='', flush=True)
         return None
 
 def handle_paused_state(process, module_name):
@@ -84,7 +113,7 @@ def handle_paused_state(process, module_name):
     global control_action, is_paused
     
     is_paused = True
-    info(f"Module {module_name} is paused. Press 'r' to resume.")
+    info(f"Module {module_name} is paused. Press 'r' to resume or 's' to skip.")
     
     # Wait for explicit resume command
     while is_paused:
@@ -92,7 +121,7 @@ def handle_paused_state(process, module_name):
             # Check for control actions
             if control_action == 'menu':
                 choice = show_runtime_menu()
-                control_action = None  # Reset after handling
+                control_action = None  # Reset immediately
                 if choice == 'r':
                     info(f"Resuming {module_name}...")
                     is_paused = False
@@ -106,19 +135,18 @@ def handle_paused_state(process, module_name):
                     info("Quitting VAJRA...")
                     process.terminate()
                     sys.exit(0)
-                else:
-                    info("Module is still paused. Press 'r' to resume.")
-            
+                    
             elif control_action == 'resume':
                 info(f"Resuming {module_name}...")
                 is_paused = False
-                control_action = None
+                control_action = None  # Reset immediately
                 return True
                 
             elif control_action == 'skip':
                 info(f"Skipping {module_name}...")
                 process.terminate()
                 is_paused = False
+                control_action = None  # Reset immediately
                 return False
                 
             elif control_action == 'quit':
@@ -126,7 +154,7 @@ def handle_paused_state(process, module_name):
                 process.terminate()
                 sys.exit(0)
                 
-            time.sleep(0.5)  # Check less frequently while paused
+            time.sleep(0.3)  # Check less frequently while paused
             
         except KeyboardInterrupt:
             info("Interrupted. Returning to execution.")
@@ -148,13 +176,13 @@ def execute_command_with_control(command, module_name):
             # Check for control actions
             if control_action == 'menu':
                 choice = show_runtime_menu()
-                control_action = None  # Reset after handling menu
+                control_action = None  # Reset immediately after handling
                 if choice == 'p':
                     info(f"Pausing {module_name}...")
                     return handle_paused_state(process, module_name)
                 elif choice == 'r':
                     info(f"Resuming {module_name}...")
-                    # Already running, no need to resume
+                    # Continue execution
                 elif choice == 's':
                     info(f"Skipping {module_name}...")
                     process.terminate()
@@ -163,22 +191,30 @@ def execute_command_with_control(command, module_name):
                     info("Quitting VAJRA...")
                     process.terminate()
                     sys.exit(0)
-                else:
-                    info(f"Continuing {module_name}...")
+                # Any other key just continues execution
                     
             elif control_action == 'pause':
                 info(f"Pausing {module_name}...")
-                temp_action = control_action
-                control_action = None
+                action = control_action
+                control_action = None  # Reset immediately
                 return handle_paused_state(process, module_name)
                 
             elif control_action == 'quit':
+                info("Quitting VAJRA...")
                 process.terminate()
                 sys.exit(0)
                 
             elif control_action == 'skip':
+                info(f"Skipping {module_name}...")
                 process.terminate()
+                action = control_action
+                control_action = None  # Reset immediately
                 return False
+                
+            elif control_action == 'resume':
+                info(f"Resuming {module_name}...")
+                control_action = None  # Reset immediately
+                # Continue execution
                 
             time.sleep(0.1)  # Small delay
             
@@ -240,15 +276,11 @@ def merge_subdomain_files(target_dir):
         error("No subdomains found to merge. Both Subfinder and Amass returned empty results.")
         return False
 
-def check_file_exists_and_not_empty(file_path, description):
-    """Check if a file exists and is not empty."""
-    if not os.path.exists(file_path):
-        error(f"{description} not found: {file_path}")
-        return False
-    if os.path.getsize(file_path) == 0:
-        error(f"{description} is empty: {file_path}")
-        return False
-    return True
+def get_httpx_command(target_dir):
+    """Get the correct HTTPX command syntax for httpx-toolkit."""
+    merged_file = f"{target_dir}/Logs/merged_subs.txt"
+    # httpx-toolkit command (Kali Linux package)
+    return f"cat {merged_file} | httpx-toolkit -silent -o {target_dir}/Logs/alive.txt"
 
 def execute_modules(module_choices, target, target_dir, report_enabled):
     """
@@ -297,12 +329,17 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
     
     # Execute each module in the plan
     for i, (module_func, module_name) in enumerate(execution_plan):
+        # Reset skip flag for each module
+        skip_current_module = False
+        
         if control_action == 'quit':
             info("Quitting VAJRA.")
             sys.exit(0)
+            
         if control_action == 'skip':
             info(f"Skipping {module_name}.")
             control_action = None
+            skip_current_module = True
             
             # Special handling for HTTPX skip
             if module_name == "HTTPX":
@@ -315,39 +352,19 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
                         continue
                     else:
                         info("Continuing with HTTPX execution.")
+                        skip_current_module = False
                         control_action = None
                 except KeyboardInterrupt:
                     info("Continuing with HTTPX execution.")
+                    skip_current_module = False
                     control_action = None
-            
+        
+        if skip_current_module:
             continue
             
         info(f"Starting module: {module_name}")
         
         try:
-            # Special pre-processing for HTTPX
-            if module_name == "HTTPX":
-                # Check if we have merged subdomains file
-                merged_file = f"{target_dir}/Logs/merged_subs.txt"
-                if not os.path.exists(merged_file):
-                    # Try to create merged file from available results
-                    if not merge_subdomain_files(target_dir):
-                        error("Cannot run HTTPX without subdomain data. Skipping HTTPX and subsequent modules.")
-                        skip_httpx = True
-                        continue
-            
-            # Special handling for modules that need previous results
-            if module_name in ["Nmap", "Screenshot"] and skip_httpx:
-                info(f"Skipping {module_name} because HTTPX was skipped/failed.")
-                continue
-                
-            if module_name in ["Nmap", "Screenshot"]:
-                # Check if alive.txt exists and has content
-                alive_file = f"{target_dir}/Logs/alive.txt"
-                if not check_file_exists_and_not_empty(alive_file, "Alive hosts file"):
-                    info(f"Skipping {module_name} because no alive hosts were found.")
-                    continue
-            
             # For modules that use subprocess directly
             if module_name in ["Whois", "Subfinder", "Amass", "HTTPX", "Screenshot"]:
                 # Build the command based on module
@@ -358,16 +375,27 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
                 elif module_name == "Amass":
                     command = f"amass enum -d {target} -o {target_dir}/Logs/amass.txt"
                 elif module_name == "HTTPX":
-                    command = f"httpx -l {target_dir}/Logs/merged_subs.txt -silent -o {target_dir}/Logs/alive.txt"
+                    # Merge subdomains BEFORE running HTTPX
+                    if not merge_subdomain_files(target_dir):
+                        error("Cannot run HTTPX without subdomain data. Skipping HTTPX and subsequent modules.")
+                        skip_httpx = True
+                        continue
+                    command = get_httpx_command(target_dir)
                 elif module_name == "Screenshot":
-                    command = f"eyewitness --web -f {target_dir}/Logs/alive.txt -d {target_dir}/Screenshots/ --no-prompt"
+                    # Build eyewitness command based on target type
+                    if target.startswith('@'):
+                        # File input - use the file directly
+                        file_path = target[1:]
+                        command = f"eyewitness --web --timeout 30 --threads 500 --prepend-https -f {file_path} -d {target_dir}/Screenshots/ --no-prompt"
+                    else:
+                        # Single target
+                        if not target.startswith(('http://', 'https://')):
+                            target_url = f"https://{target}"
+                        else:
+                            target_url = target
+                        command = f"eyewitness --web --timeout 30 --threads 500 --prepend-https --single {target_url} -d {target_dir}/Screenshots/ --no-prompt"
                 
                 success_flag = execute_command_with_control(command, module_name)
-                
-                # Post-processing after Subfinder or Amass
-                if module_name in ["Subfinder", "Amass"] and success_flag:
-                    # Try to merge results after each subdomain discovery tool
-                    merge_subdomain_files(target_dir)
                 
             else:
                 # For Nmap with custom logic
@@ -391,11 +419,6 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
                 sys.exit(0)
             elif choice == 's':
                 info(f"Skipping {module_name}.")
-                
-                # Special handling for HTTPX skip
-                if module_name == "HTTPX":
-                    skip_httpx = True
-                
                 continue
         except Exception as e:
             error(f"Unexpected error in {module_name}: {e}")

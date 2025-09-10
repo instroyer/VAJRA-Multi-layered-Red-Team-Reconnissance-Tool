@@ -118,12 +118,12 @@ def nmap_submenu():
     Returns the chosen technique and report preference.
     """
     nmap_menu = """
-    | Nmap Scan Techniques:    |
+    | Nmap Scan Techniques:    
     |--------------------------|
-    | [1] Quick Scan (Top 1000 ports)(Default)    |
-    | [2] Full Port Scan (1–65535)    |
-    | [3] Fast Scan (-A)    |
-    | [4] UDP Scan (Top 100 UDP ports)    |
+    | [1] Quick Scan (Top 1000 ports)(Default) 
+    | [2] Full Port Scan (1–65535) 
+    | [3] Fast Scan (-A)   
+    | [4] UDP Scan (Top 100 UDP ports)  
     """
     print(nmap_menu)
     
