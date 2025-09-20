@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""
-VAJRA - Multi-layered Red Team Reconnaissance Framework
-Main Entry Point | Orchestrator
+""" 
+VAJRA - Multi-layered Red Team Reconnaissance Framework Main Entry Point | Orchestrator
 """
 
 import sys
@@ -27,17 +26,17 @@ def path_completer(text, state):
     # Expand ~ to home directory
     if '~' in text:
         text = os.path.expanduser(text)
-    
+
     # Handle @ prefix for file targets
     if text.startswith('@'):
         text = text[1:]
         prefix = '@'
     else:
         prefix = ''
-    
+
     # Find matches
     matches = glob.glob(text + '*')
-    
+
     # Add appropriate suffix based on whether it's a directory or file
     completed_matches = []
     for match in matches:
@@ -45,7 +44,7 @@ def path_completer(text, state):
             completed_matches.append(prefix + match + '/')
         else:
             completed_matches.append(prefix + match)
-    
+
     # Return the match at the current state
     if state < len(completed_matches):
         return completed_matches[state]
@@ -63,6 +62,7 @@ try:
     from Engine.file_ops import create_target_dirs
     from Engine.runtime import execute_modules
     from Engine.dependencies import check_dependencies, install_dependencies
+    from Engine.input_utils import get_input, clear_input_buffer  # ADDED
 except ImportError as e:
     print(f"Import error: {e}")
     print("Current Python path:", sys.path)
@@ -82,13 +82,6 @@ def get_targets_from_file(file_path):
         error(f"Error reading file {file_path}: {e}")
         return []
 
-def get_input(prompt):
-    """Get input with proper readline support for arrow keys and editing."""
-    try:
-        return input(prompt)
-    except (KeyboardInterrupt, EOFError):
-        raise KeyboardInterrupt
-
 def get_target():
     """Get and validate target input from user."""
     while True:
@@ -104,27 +97,27 @@ def get_target():
                 if not os.path.isfile(file_path):
                     error(f"File not found: {file_path}")
                     continue
-                
+
                 # Read targets from file
                 targets = get_targets_from_file(file_path)
-                
+
                 if not targets:
                     error(f"No valid targets found in {file_path}")
                     continue
-                
+
                 # Get just the filename without path for folder naming
                 file_name = os.path.splitext(os.path.basename(file_path))[0]
-                
+
                 info(f"Found {len(targets)} targets in file: {file_path}")
                 return target, targets, True, file_name  # Return file specifier, target list, is_file flag, and file_name
-                
+
             # Validate single target format
             if " " in target and not all(part.isdigit() or part == '.' for part in target.split()):
                 error("Invalid target format. Use @file.txt for multiple targets.")
                 continue
 
             return target, [target], False, None  # Return as single target in list, not file
-            
+
         except KeyboardInterrupt:
             info("\nOperation cancelled by user.")
             sys.exit(0)
@@ -135,21 +128,21 @@ def process_targets(targets, module_choices, report_enabled, is_file_input=False
         # Create target-specific directory structure
         clean_target = ''.join(c for c in target if c.isalnum() or c in ['.', '-', '_'])
         target_dir = create_target_dirs(Config.RESULTS_BASE_DIR, clean_target, is_file_input, file_name)
-        
+
         if not target_dir:
             error(f"Failed to create output directories for {target}. Skipping.")
             continue
-        
+
         # Use yellow color for target information
         target_info(f"Target set to: {target}")
         info(f"Output directory: {target_dir}")
-        
+
         if is_file_input:
             info(f"Processing target {targets.index(target) + 1}/{len(targets)} from file")
-        
+
         # Execute the selected modules for this target
         execute_modules(module_choices, target, target_dir, report_enabled)
-        
+
         if is_file_input and targets.index(target) < len(targets) - 1:
             info("Moving to next target...")
 
@@ -162,34 +155,34 @@ def main():
         # Check for module availability
         info("Checking system dependencies...")
         missing_tools = check_dependencies(silent=False)
-        
+
         if missing_tools:
             if not install_dependencies(missing_tools):
                 sys.exit(1)
-            
-            info("Verifying installation...")
-            still_missing = check_dependencies(silent=True)
-            
-            if still_missing:
-                error("Some tools are still missing. Exiting.")
-                for tool in still_missing:
-                    error(f"- {tool} not found")
-                sys.exit(1)
-            else:
-                success("All dependencies are now satisfied!")
+
+        info("Verifying installation...")
+        still_missing = check_dependencies(silent=True)
+
+        if still_missing:
+            error("Some tools are still missing. Exiting.")
+            for tool in still_missing:
+                error(f"- {tool} not found")
+            sys.exit(1)
+        else:
+            success("All dependencies are now satisfied!")
 
         # Main program loop
         while True:
             # Get target from user (could be single target or file)
             target_input, targets, is_file_input, file_name = get_target()
-            
+
             # Get module selection (only once for file inputs)
             if is_file_input:
                 info("File input detected. Select modules once for all targets.")
                 target_for_menu = targets[0] if targets else "file_targets"
             else:
                 target_for_menu = target_input
-            
+
             # MODULE SELECTION LOOP FOR THIS TARGET
             while True:
                 # Display main menu and get user selection
@@ -204,8 +197,9 @@ def main():
                     continue  # Stay in module selection loop
 
                 # Get report preference (only once for file inputs)
-                if module_choices == '5':
-                    # Nmap handles its own report prompt internally
+                if module_choices == '6':  # Eyewitness only - skip report prompt
+                    report_enabled = False
+                elif module_choices == '5':  # Nmap handles its own report prompt internally
                     report_enabled = False
                 else:
                     try:
@@ -222,6 +216,7 @@ def main():
             # After finishing all targets, ask if user wants to scan NEW targets
             try:
                 new_target = get_input("\nScan new targets? (y/n) > ").strip().lower()
+
                 if new_target != 'y':
                     success("Thank you for using VAJRA. Exiting.")
                     break  # Break out of main program loop
@@ -230,7 +225,7 @@ def main():
                 break  # Break out of main program loop
 
     except KeyboardInterrupt:
-        info("\n\nOperation cancelled by user. Exiting.")
+        info("\nOperation cancelled by user. Exiting.")
         sys.exit(0)
     except Exception as e:
         error(f"An unexpected error occurred in the main loop: {e}")

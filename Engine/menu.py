@@ -1,16 +1,20 @@
+# Engine/menu.py
 # Menu system and input handling for VAJRA
+
 from .logger import info, success, warning, error
 import time
 import threading
 import sys
 import select
+from Engine.input_utils import get_input, clear_input_buffer
 
 def main_menu(target):
     """
     Display the main module selection menu.
     Returns a string of the user's choice(s).
     """
-    menu_text = f"""
+
+    menu_text = f""" 
     {'='*50}
     VAJRA Main Menu | Target: {target}
     {'='*50}
@@ -26,8 +30,9 @@ def main_menu(target):
     [ 000 ] Show Help Menu
     {'='*50}
     """
+
     print(menu_text)
-    
+
     while True:
         try:
             choice = input("> ").strip()
@@ -52,6 +57,7 @@ def main_menu(target):
         except EOFError:
             raise KeyboardInterrupt
 
+
 def show_help():
     """Display the help menu with option to return immediately with Enter."""
     help_text = f"""
@@ -59,44 +65,45 @@ def show_help():
     [ * ] VAJRA HELP MENU
     {'='*50}
     [ + ] Module Selection
-     [ - ] Target formats supported:
-     • Domain name → example.com
-     • Subdomain → test.example.com
-     • IP address → 192.168.1.10
-     • IP range → 192.168.1.0/24
-     • File input → @targets.txt (list of targets)
+    [ - ] Target formats supported:
+       └ Domain name → example.com
+       └ Subdomain → test.example.com
+       └ IP address → 192.168.1.10
+       └ IP range → 192.168.1.0/24
+       └ File input → @targets.txt (list of targets)
 
     [ + ] MODULE DESCRIPTIONS
-     [0] Complete Pipeline - Run all modules sequentially
-     [1] Whois - Domain registration intelligence
-     [2] Subfinder - Passive subdomain discovery
-     [3] Amass - Comprehensive subdomain enumeration
-     [4] HTTPX - Live web service verification
-     [5] Nmap - Port scanning & service detection
-     [6] Screenshot - Visual reconnaissance
+    [0] Complete Pipeline - Run all modules sequentially
 
-     [ - ] Usage Examples:
-     > 0 → Run all modules in sequence
-     > 1 2 4 → Run Whois + Subfinder + HTTPX
-     > 1 → Run Whois
-     > 000 → Show this Help Menu
+    [1] Whois - Domain registration intelligence  
+    [2] Subfinder - Passive subdomain discovery  
+    [3] Amass - Comprehensive subdomain enumeration  
+    [4] HTTPX - Live web service verification  
+    [5] Nmap - Port scanning & service detection  
+    [6] Screenshot - Visual reconnaissance  
 
-    [ + ] Runtime Control (during execution)
-     [ - ] Trigger: > 00 + ENTER
-     [ - ] Actions:
-        p → Pause current module
-        r → Resume paused module
-        s → Skip current module
-        q → Quit VAJRA entirely
-     [ - ] Any other key → Exit Runtime Menu
+    [ - ] Usage Examples:  
+      0 -> Run all modules in sequence  
+      1 2 4 -> Run Whois + Subfinder + HTTPX  
+      1 -> Run Whois  
+      000 -> Show this Help Menu  
 
-    [ + ] Notes
-     [ - ] Reports are saved under: Results/Target_YYYYMMDD_HHMMSS/Reports/
+    [ + ] Runtime Control (during execution)  
+    [ - ] Trigger: 00 + ENTER  
+    [ - ] Actions:  
+        p -> Pause current module  
+        r -> Resume paused module  
+        s -> Skip current module  
+        q -> Quit VAJRA entirely
+    [ - ] Any other key -> Exit Runtime Menu  
+
+    [ + ] Notes  
+    [ - ] Reports are saved under: Results/Target_YYYYMMDD_HHMMSS/Reports/  
     {'='*50}
     Press Enter to return immediately or wait 15 seconds...
     """
     print(help_text)
-    
+
     # Wait for Enter key or timeout
     try:
         for i in range(15, 0, -1):
@@ -112,24 +119,38 @@ def show_help():
         print(" " * 30, end='\r')  # Clear the countdown line
         return
 
-def nmap_submenu():
+
+def nmap_submenu(input_func=None):
     """
     Display the Nmap scan technique submenu.
-    Returns the chosen technique and report preference.
+    Accepts an optional input function (input_func) to collect input; if not provided,
+    falls back to Engine.input_utils.get_input. Returns the chosen technique and report preference.
     """
+    # choose prompt function
+    prompt = input_func if input_func is not None else get_input
+
     nmap_menu = """
     | Nmap Scan Techniques:    
     |--------------------------|
-    | [1] Quick Scan (Top 1000 ports)(Default) 
-    | [2] Full Port Scan (1–65535) 
+    | [1] Quick Scan (Top 1000 ports) (Default) 
+    | [2] Full Port Scan (1-65535) 
     | [3] Fast Scan (-A)   
     | [4] UDP Scan (Top 100 UDP ports)  
     """
+
     print(nmap_menu)
-    
+
+    # Clear any existing input buffer first
+    try:
+        clear_input_buffer()
+    except:
+        pass
+
     while True:
         try:
-            choice = input("Choose scan type (1-4) [1] > ").strip()
+            # use prompt() so caller can inject safe_input
+            choice = prompt("Choose scan type (1-4) [1] > ").strip()
+            # Handle empty input (just pressing Enter) - default to quick scan
             if not choice:
                 scan_type = 'quick'
             elif choice in ['1', '2', '3', '4']:
@@ -138,12 +159,15 @@ def nmap_submenu():
             else:
                 error("Invalid choice. Please select 1-4.")
                 continue
-            
+
             # Ask for report generation after selecting scan type
-            report_choice = input("Do you want to generate a report? (y/n) [n] > ").strip().lower()
-            generate_report = (report_choice == 'y')
-            
+            report_choice = prompt("Do you want to generate a report? (y/n) [n] > ").strip().lower()
+            if not report_choice:
+                generate_report = False
+            else:
+                generate_report = (report_choice == 'y')
+
             return scan_type, generate_report
-            
+
         except KeyboardInterrupt:
             return 'quick', False  # Default on interrupt

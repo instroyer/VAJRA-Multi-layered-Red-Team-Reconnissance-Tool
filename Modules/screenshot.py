@@ -1,3 +1,5 @@
+# Modules/screenshot.py
+
 # Screenshot (Eyewitness) module execution
 import subprocess
 import os
@@ -8,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from Engine.logger import info, error
 
-def run(target, output_dir):
+def run(target, output_dir, report_enabled=False):
     """Run the eyewitness tool on the target."""
     try:
         # Handle file input (@filename.txt)
@@ -23,7 +25,6 @@ def run(target, output_dir):
         
         else:
             # Single target - use direct URL
-            # Add https:// prefix if not present
             if not target.startswith(('http://', 'https://')):
                 target_url = f"https://{target}"
             else:
