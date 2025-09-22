@@ -24,11 +24,17 @@ try:
 except ImportError as e:
     print(f"Failed to import modules: {e}")
 
-    def dummy_run(*args, **kwargs):
-        error("Module not available")
-        return False
+def dummy_run(*args, **kwargs):
+    error("Module not available")
+    return False
 
-    whois_run = subfinder_run = amass_run = httpx_run = nmap_run = screenshot_run = dummy_run
+# Fallback to dummy functions if imports failed
+whois_run = whois_run if 'whois_run' in locals() else dummy_run
+subfinder_run = subfinder_run if 'subfinder_run' in locals() else dummy_run
+amass_run = amass_run if 'amass_run' in locals() else dummy_run
+httpx_run = httpx_run if 'httpx_run' in locals() else dummy_run
+nmap_run = nmap_run if 'nmap_run' in locals() else dummy_run
+screenshot_run = screenshot_run if 'screenshot_run' in locals() else dummy_run
 
 # Global variables
 runtime_control_flag = threading.Event()
@@ -37,9 +43,8 @@ current_module = ""
 is_paused = False
 listener_active = True  # flag to suspend listener while prompting
 
-
 def runtime_control_listener():
-    """Listen for runtime control commands in a separate thread."""
+    """Listen for runtime control commands in a separate thread"""
     global control_action, listener_active
     while not runtime_control_flag.is_set():
         try:
@@ -61,21 +66,19 @@ def runtime_control_listener():
                     control_action = 'quit'
                 while sys.stdin in select.select([sys.stdin], [], [], 0.01)[0]:
                     sys.stdin.readline()
+
         except:
             break
 
-
 def pause_listener():
-    """Suspend the runtime control listener."""
+    """Suspend the runtime control listener"""
     global listener_active
     listener_active = False
 
-
 def resume_listener():
-    """Resume the runtime control listener."""
+    """Resume the runtime control listener"""
     global listener_active
     listener_active = True
-
 
 def safe_input(prompt, default=None):
     """
@@ -95,17 +98,18 @@ def safe_input(prompt, default=None):
     finally:
         resume_listener()
 
-
 def show_runtime_menu():
     """Display the runtime control menu."""
     menu = """
-    | Runtime Control    |
-    |--------------------|
-    | [p] Pause current module    |
-    | [r] Resume paused module    |
-    | [s] Skip current module     |
-    | [q] Quit VAJRA entirely     |
-    | [any] Return to execution   |
+    +----------------------------+
+    |      Runtime Control       |
+    +----------------------------+
+    | [p] Pause current module   |
+    | [r] Resume paused module   |
+    | [s] Skip current module    |
+    | [q] Quit VAJRA entirely    |
+    | [any] Return to execution  |
+    +----------------------------+
     """
     print(menu)
 
@@ -143,7 +147,6 @@ def show_runtime_menu():
         return None
     finally:
         resume_listener()
-
 
 def handle_paused_state(process, module_name):
     """Handle the paused state until user explicitly resumes."""
@@ -196,14 +199,12 @@ def handle_paused_state(process, module_name):
             is_paused = False
             return True
 
-
 def execute_command_with_control(command, module_name):
     """Execute a command with runtime control support."""
     global control_action, current_module, is_paused
 
     current_module = module_name
     info(f"Running: {command}")
-
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     try:
@@ -261,7 +262,6 @@ def execute_command_with_control(command, module_name):
         process.terminate()
         return False
 
-
 def merge_subdomain_files(target_dir):
     """Merge subfinder and amass results into a single file."""
     subfinder_file = f"{target_dir}/Logs/subfinder.txt"
@@ -270,6 +270,7 @@ def merge_subdomain_files(target_dir):
 
     all_subs = set()
 
+    # Read from Subfinder
     if os.path.exists(subfinder_file) and os.path.getsize(subfinder_file) > 0:
         try:
             with open(subfinder_file, 'r') as f:
@@ -277,10 +278,11 @@ def merge_subdomain_files(target_dir):
                     sub = line.strip()
                     if sub:
                         all_subs.add(sub)
-            info(f"Loaded {len([s for s in all_subs if s])} subdomains from Subfinder")
+            info(f"Loaded {len(all_subs)} subdomains from Subfinder")
         except Exception as e:
             error(f"Error reading Subfinder file: {e}")
 
+    # Read from Amass
     if os.path.exists(amass_file) and os.path.getsize(amass_file) > 0:
         try:
             with open(amass_file, 'r') as f:
@@ -288,10 +290,11 @@ def merge_subdomain_files(target_dir):
                     sub = line.strip()
                     if sub:
                         all_subs.add(sub)
-            info(f"Loaded {len([s for s in all_subs if s])} total subdomains after Amass")
+            info(f"Loaded {len(all_subs)} total subdomains after Amass")
         except Exception as e:
             error(f"Error reading Amass file: {e}")
 
+    # Write merged results
     if all_subs:
         try:
             with open(merged_file, 'w') as f:
@@ -305,13 +308,6 @@ def merge_subdomain_files(target_dir):
     else:
         error("No subdomains found to merge. Both Subfinder and Amass returned empty results.")
         return False
-
-
-def get_httpx_command(target_dir):
-    """Get the correct HTTPX command syntax for httpx-toolkit."""
-    merged_file = f"{target_dir}/Logs/merged_subs.txt"
-    return f"cat {merged_file} | httpx-toolkit -silent -o {target_dir}/Logs/alive.txt"
-
 
 def execute_modules(module_choices, target, target_dir, report_enabled):
     """
@@ -383,7 +379,7 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
         if module_name == "HTTPX":
             warning("HTTPX is critical for the recon pipeline. Skipping it will break subsequent modules.")
             try:
-                choice = safe_input("Do you want to continue skipping? This will break Nmap and Screenshot. (y/n) > ", default="n").strip().lower()
+                choice = safe_input("Do you want to continue skipping? This will skip Nmap and Screenshot. (y/n) > ", default="n").strip().lower()
                 if choice == 'y':
                     skip_httpx = True
                     info("Skipping HTTPX. Nmap and Screenshot will be skipped automatically.")
@@ -409,15 +405,12 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
                 if module_name == "Whois":
                     command = f"whois {target} > {target_dir}/Logs/whois.txt"
                     success_flag = execute_command_with_control(command, module_name)
-
                 elif module_name == "Subfinder":
                     command = f"subfinder -d {target} -silent -o {target_dir}/Logs/subfinder.txt"
                     success_flag = execute_command_with_control(command, module_name)
-
                 elif module_name == "Amass":
                     command = f"amass enum -d {target} -o {target_dir}/Logs/amass.txt"
                     success_flag = execute_command_with_control(command, module_name)
-
                 elif module_name == "HTTPX":
                     # Merge subdomains BEFORE running HTTPX
                     if not merge_subdomain_files(target_dir):
@@ -425,20 +418,19 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
                         skip_httpx = True
                         success_flag = False
                     else:
-                        command = get_httpx_command(target_dir)
-                        success_flag = execute_command_with_control(command, module_name)
-
+                        # HTTPX module now handles everything internally
+                        success_flag = module_func(target, target_dir)
             else:
                 # For Nmap with custom logic or Screenshot delegation
                 # When running the full pipeline (module_choices == '0'), prefer alive.txt if it exists
                 alive_file = f"{target_dir}/Logs/alive.txt"
                 alive_exists = os.path.exists(alive_file) and os.path.getsize(alive_file) > 0
-
+                
                 if module_name == "Nmap":
-                    # If run-all and httpx produced alive.txt, run nmap on that list.
+                    # If run-all and httpx produced alive.txt, run nmap on that list
                     if module_choices == '0' and alive_exists:
                         nmap_target = f"@{alive_file}"
-                        # module_func could be a lambda that already wraps scan type (for run-all)
+                        # module_func could be a lambda that already wraps scan type for run-all
                         success_flag = module_func(nmap_target, target_dir, report_enabled)
                     elif module_name == "Nmap" and module_choices != '0':
                         # interactive Nmap selection for single-module invocation
@@ -450,13 +442,12 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
                         success_flag = module_func(target, target_dir, report_enabled)
 
                 elif module_name == "Screenshot":
-                    # If run-all and httpx produced alive.txt, run screenshots on that list.
+                    # if run-all and httpx produced alive.txt, run screenshots on that list
                     if module_choices == '0' and alive_exists:
                         screenshot_target = f"@{alive_file}"
                         success_flag = module_func(screenshot_target, target_dir, report_enabled)
                     else:
                         success_flag = module_func(target, target_dir, report_enabled)
-
                 else:
                     # Other modules (including when run-all wraps nmap as lambda)
                     success_flag = module_func(target, target_dir, report_enabled)
@@ -485,6 +476,16 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
 
     # Stop the listener thread
     runtime_control_flag.set()
+
+    # After all modules are executed, create final.json
+    if execution_plan:  # Only if modules were actually run
+        try:
+            from Engine.finaljson import create_final_json
+            create_final_json(target_dir, module_choices)
+        except ImportError:
+            warning("finaljson module not available, skipping JSON creation")
+        except Exception as e:
+            error(f"Error creating final.json: {e}")
 
     # Handle report generation
     if report_enabled and module_choices not in ['6', '5']:

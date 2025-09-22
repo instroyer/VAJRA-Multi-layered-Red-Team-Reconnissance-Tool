@@ -6,6 +6,8 @@ from .file_ops import create_target_dirs
 from .runtime import execute_modules
 from .report import generate_report
 from .dependencies import check_dependencies, install_dependencies
+from .input_utils import get_input, clear_input_buffer
+from .finaljson import create_final_json 
 
 __all__ = [
     'display_banner',
@@ -14,5 +16,7 @@ __all__ = [
     'create_target_dirs',
     'execute_modules',
     'generate_report',
-    'check_dependencies', 'install_dependencies'
+    'check_dependencies', 'install_dependencies',
+    'get_input', 'clear_input_buffer',
+    'create_final_json' 
 ]
