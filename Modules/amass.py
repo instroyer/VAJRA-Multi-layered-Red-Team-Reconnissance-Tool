@@ -1,3 +1,4 @@
+# VAJRA/Modules/amass.py
 # Amass module execution
 import subprocess
 import os
@@ -11,31 +12,27 @@ from Engine.logger import info, error
 def run(target, output_dir):
     """Run the amass tool on the target."""
     try:
-        # Use different Amass commands to handle resolver issues
-        commands_to_try = [
-            f"amass enum -d {target} -o {output_dir}/Logs/amass.txt",
-            f"amass enum -d {target} -r 8.8.8.8,1.1.1.1 -o {output_dir}/Logs/amass.txt",  # Specify resolvers
-            f"amass enum -d {target} -r 8.8.8.8 -o {output_dir}/Logs/amass.txt",  # Single resolver
-            f"amass enum -d {target} -config /etc/amass/config.ini -o {output_dir}/Logs/amass.txt"  # Use config
-        ]
+        log_file = f"{output_dir}/Logs/amass.txt"
         
-        for command in commands_to_try:
-            info(f"Trying: {command}")
-            result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=300)
-            
-            if result.returncode == 0:
-                info(f"Amass results saved to: {output_dir}/Logs/amass.txt")
+        # Simple command without timeout parameter
+        command = f"amass enum -d {target} -o {log_file}"
+        info(f"Running: {command}")
+        
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            if os.path.exists(log_file) and os.path.getsize(log_file) > 0:
+                with open(log_file, 'r') as f:
+                    line_count = len(f.readlines())
+                info(f"Amass found {line_count} subdomains. Saved to: {log_file}")
                 return True
             else:
-                error(f"Amass attempt failed: {result.stderr}")
-                continue
-                
-        error("All Amass attempts failed. Skipping Amass.")
-        return False
-        
-    except subprocess.TimeoutExpired:
-        error("Amass timed out after 5 minutes. Skipping.")
-        return False
+                info("Amass completed but found no subdomains")
+                return True
+        else:
+            error(f"Amass failed: {result.stderr[:200]}...")
+            return False
+
     except Exception as e:
         error(f"Error executing amass: {e}")
         return False

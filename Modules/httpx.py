@@ -1,4 +1,6 @@
-# HTTPX module execution (using httpx-toolkit)
+# VAJRA/Modules/httpx.py
+# Description: HTTPX module execution (using httpx-toolkit).
+
 import subprocess
 import os
 import sys
@@ -6,77 +8,71 @@ import sys
 # Add the parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from Engine.logger import info, error
+from Engine.logger import info, success, error
 
 def extract_urls_from_json(json_file, output_file):
-    """Extract clean URLs from httpx JSON output using jq and sed"""
+    """Extract clean URLs from httpx JSON output using jq and sed."""
     try:
-        # Extract URLs and clean them (remove protocol prefixes, keep only hostname)
-        # This makes the output compatible with Nmap and other tools
-        command = f"jq -r '.url' {json_file} | sed -E 's#(https?://)?([^:/]+).*#\\2#' | sort -u > {output_file}"
-        info(f"Extracting URLs: {command}")
+        command = f"jq -r '.url' {json_file} | sed -E 's#(https?://)?([^/]+).*#\\2#' | sort -u > {output_file}"
+        info(f"Extracting unique hostnames from JSON output...")
         
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        
         if result.returncode == 0:
-            # Count lines to show how many URLs were extracted
             with open(output_file, 'r') as f:
                 url_count = len(f.readlines())
-            info(f"Extracted {url_count} unique hostnames to: {output_file}")
+            success(f"Extracted {url_count} unique hostnames to: {os.path.basename(output_file)}")
             return True
         else:
-            error(f"URL extraction failed: {result.stderr}")
+            error(f"URL extraction failed: {result.stderr.strip()}")
             return False
-            
     except Exception as e:
         error(f"Error extracting URLs from JSON: {e}")
         return False
 
 def run(target, output_dir):
-    """Run the httpx-toolkit on the target and extract clean hostnames"""
-    try:
-        merged_file = f"{output_dir}/Logs/merged_subs.txt"
-        json_output = f"{output_dir}/Logs/alive.json"
-        txt_output = f"{output_dir}/Logs/alive.txt"
-        
-        # Check if we have subdomains to process
-        if not os.path.exists(merged_file) or os.path.getsize(merged_file) == 0:
-            error("No subdomains found to process. Skipping HTTPX.")
-            return False
+    """Run the httpx-toolkit on the target and extract clean hostnames."""
+    json_output = os.path.join(output_dir, "Logs", "alive.json")
+    txt_output = os.path.join(output_dir, "Logs", "alive.txt")
+    command = ""
 
-        # httpx-toolkit command with JSON output
-        command = f"cat {merged_file} | httpx-toolkit -json -o {json_output}"
+    try:
+        # --- CHANGE START: Logic to handle different input types ---
+        if target.startswith('@'):
+            # Input is a file list (e.g., from merged_subs.txt or a user file)
+            input_file = target[1:]
+            if not os.path.exists(input_file) or os.path.getsize(input_file) == 0:
+                error(f"Input file not found or is empty: {input_file}. Skipping HTTPX.")
+                return False
+            command = f"cat {input_file} | httpx-toolkit -json -o {json_output}"
+        else:
+            # Input is a single domain/IP
+            command = f"echo {target} | httpx-toolkit -json -o {json_output}"
+        # --- CHANGE END ---
+
         info(f"Running: {command}")
-        
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=120)
+        # Using a longer timeout for potentially large lists
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=300)
 
         if result.returncode == 0:
-            info(f"HTTPX JSON results saved to: {json_output}")
+            if not os.path.exists(json_output) or os.path.getsize(json_output) == 0:
+                warning("HTTPX ran successfully but found no live hosts.")
+                return True # Not a failure, just no results
             
-            # Extract clean hostnames from JSON to create Nmap-compatible alive.txt
+            success(f"HTTPX JSON results saved to: {os.path.basename(json_output)}")
+            
             if extract_urls_from_json(json_output, txt_output):
-                info("HTTPX completed successfully. Both JSON and clean hostname formats available.")
-                
-                # Show sample of extracted hostnames for user confirmation
-                try:
-                    with open(txt_output, 'r') as f:
-                        hosts = f.readlines()[:5]  # Show first 5 hosts
-                    if hosts:
-                        info(f"Sample hosts extracted: {', '.join([h.strip() for h in hosts])}{'...' if len(hosts) == 5 else ''}")
-                except:
-                    pass
-                    
+                info("Clean hostnames for other tools are available in alive.txt.")
                 return True
             else:
                 error("HTTPX succeeded but hostname extraction failed.")
                 return False
         else:
-            error(f"HTTPX failed: {result.stderr}")
+            error(f"HTTPX failed: {result.stderr.strip()}")
             return False
 
     except subprocess.TimeoutExpired:
-        error("HTTPX timed out after 2 minutes. Skipping.")
+        error("HTTPX timed out after 5 minutes. Skipping.")
         return False
     except Exception as e:
-        error(f"Error executing httpx-toolkit: {e}")
+        error(f"An error occurred while executing httpx-toolkit: {e}")
         return False
