@@ -1,87 +1,71 @@
 # VAJRA/Modules/nmap.py
-# Nmap module execution
+# Nmap module execution, using the centralized submenu from Engine/menu.py
+
 import subprocess
 import os
 import sys
-
-# Add the parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from Engine.logger import info, error
-from Engine.menu import nmap_submenu
+from Engine.logger import info, error, success
+from Engine.menu import nmap_submenu # <-- Correctly imports your submenu
+from Engine.report import generate_report # <-- Import report generator
 
 def _ensure_logs_dir(output_dir):
+    """Ensures the Logs subdirectory exists."""
     logs_dir = os.path.join(output_dir, "Logs")
-    try:
-        os.makedirs(logs_dir, exist_ok=True)
-    except Exception as e:
-        error(f"Could not ensure Logs directory: {e}")
+    os.makedirs(logs_dir, exist_ok=True)
     return logs_dir
 
-def run(target, output_dir, report_enabled=False, scan_type=None):
+def run(target, output_dir):
     """Run the nmap tool on the target."""
+    info("--- Starting module: Nmap ---")
+    
+    # Use the centralized submenu to get user choices
+    scan_type, nmap_report_enabled = nmap_submenu()
+
+    logs_dir = _ensure_logs_dir(output_dir)
+
+    # Define commands and output paths based on the chosen scan_type
+    out_paths = {
+        'quick': (os.path.join(logs_dir, "nmap_top1000.txt"), os.path.join(logs_dir, "nmap_top1000.xml")),
+        'full': (os.path.join(logs_dir, "nmap_full.txt"), os.path.join(logs_dir, "nmap_full.xml")),
+        'fast': (os.path.join(logs_dir, "nmap_fastA.txt"), os.path.join(logs_dir, "nmap_fastA.xml")),
+        'udp': (os.path.join(logs_dir, "nmap_udp.txt"), os.path.join(logs_dir, "nmap_udp.xml"))
+    }
+    
+    commands = {
+        'quick': ["nmap", target, "-T4", "--top-ports", "1000", "-sS", "-sV", "-O"],
+        'full': ["nmap", target, "-T4", "-p-", "-sS", "-sV", "-O"],
+        'fast': ["nmap", target, "-T4", "-A"],
+        'udp': ["nmap", target, "-T4", "-sU", "--top-ports", "100"]
+    }
+
+    # Get the command and output files for the selected scan type
+    command = commands.get(scan_type)
+    out_n, out_x = out_paths.get(scan_type)
+    
+    # Add the output file flags to the command
+    command.extend(["-oN", out_n, "-oX", out_x])
+
     try:
-        # If scan_type is provided (from Run All), use it without asking
-        if scan_type is not None:
-            nmap_report_enabled = report_enabled
-            info(f"Using {scan_type} scan (Run All mode)")
-        else:
-            # Otherwise, ask user via submenu
-            scan_type, nmap_report_enabled = nmap_submenu()
-
-        # Ensure Logs directory exists
-        logs_dir = _ensure_logs_dir(output_dir)
-
-        # Determine input source: file or single target
-        if str(target).startswith('@'):
-            file_path = str(target)[1:]  # Remove the @ symbol
-            input_spec = f"-iL {file_path}"
-        else:
-            input_spec = str(target)
-
-        # Define output file paths
-        out_paths = {
-            'quick': (
-                os.path.join(logs_dir, "nmap_top1000.txt"),
-                os.path.join(logs_dir, "nmap_top1000.xml")
-            ),
-            'full': (
-                os.path.join(logs_dir, "nmap_full.txt"),
-                os.path.join(logs_dir, "nmap_full.xml")
-            ),
-            'fast': (
-                os.path.join(logs_dir, "nmap_fast.txt"),
-                os.path.join(logs_dir, "nmap_fast.xml")
-            ),
-            'udp': (
-                os.path.join(logs_dir, "nmap_udp.txt"),
-                os.path.join(logs_dir, "nmap_udp.xml")
-            )
-        }
-
-        out_n, out_x = out_paths.get(scan_type, out_paths['quick'])
-
-        # Define commands based on scan type
-        commands = {
-            'quick': f"nmap {input_spec} -T4 --top-ports 1000 -sS -sV -O -oN {out_n} -oX {out_x}",
-            'full': f"nmap {input_spec} -T4 -p- -sS -sV -O -oN {out_n} -oX {out_x}",
-            'fast': f"nmap {input_spec} -T4 -A -sS -sV -O -oN {out_n} -oX {out_x}",
-            'udp': f"nmap {input_spec} -T4 -sU --top-ports 100 -sV -O -oN {out_n} -oX {out_x}"
-        }
-
-        command = commands.get(scan_type, commands['quick'])
-        info(f"Running: {command}")
+        info(f"Running: {' '.join(command)}")
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
         
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        info(f"Nmap {scan_type} scan completed.")
+        info(f"Output: {out_n}")
+        
+        # Trigger report generation if the user requested it
+        if nmap_report_enabled:
+            info("Generating HTML report...")
+            # We pass "5" because that's the module choice for Nmap from the main menu
+            if generate_report(target, output_dir, "5"):
+                success("HTML report generation successful.")
+            else:
+                error("Failed to generate HTML report.")
 
-        if result.returncode == 0:
-            info(f"Nmap {scan_type} scan completed.")
-            info(f"Output: {out_n}")
-            return True
-        else:
-            error(f"Nmap failed: {result.stderr}")
-            return False
-
+    except FileNotFoundError:
+        error("Nmap command not found. Please ensure Nmap is installed and in your system's PATH.")
+    except subprocess.CalledProcessError as e:
+        error(f"Nmap failed: {e.stderr.strip()}")
     except Exception as e:
-        error(f"Error executing nmap: {e}")
-        return False
+        error(f"An error occurred while executing nmap: {e}")
+
+    success("Module Nmap completed successfully.")

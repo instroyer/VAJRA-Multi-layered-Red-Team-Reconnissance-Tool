@@ -50,7 +50,7 @@ class ReportGenerator:
             body_sections.append(self._generate_service_section())
         
         if 'nmap' in self.data and ('5' in self.module_choices or '0' in self.module_choices):
-             body_sections.append(self._generate_nmap_section())
+              body_sections.append(self._generate_nmap_section())
         
         # Add recommendations if more than just Whois was run
         if len(self.module_choices.intersection({'0', '4', '5'})) > 0:
@@ -146,16 +146,19 @@ class ReportGenerator:
                 <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
             </h2>
             <div class="section-content">
-                <table class="compact-table">
-                    <tr><td><strong>Domain Name</strong></td><td>{whois.get('domain_name', 'N/A')}</td></tr>
-                    <tr><td><strong>Registrar</strong></td><td>{whois.get('registrar', 'N/A')}</td></tr>
-                    <tr><td><strong>Creation Date</strong></td><td>{whois.get('creation_date', 'N/A')}</td></tr>
-                    <tr><td><strong>Expiration Date</strong></td><td>{whois.get('expiration_date', 'N/A')}</td></tr>
-                    <tr><td><strong>Name Servers</strong></td><td><ul>{name_servers_html}</ul></td></tr>
-                    <tr><td><strong>DNSSEC Status</strong></td><td>{whois.get('dnssec_status', 'N/A')}</td></tr>
-                    <tr><td><strong>Registrant Org</strong></td><td>{whois.get('registrant_organization', 'N/A')}</td></tr>
-                    <tr><td><strong>Registrant Country</strong></td><td>{whois.get('registrant_country', 'N/A')}</td></tr>
-                </table>
+                <div style="position: relative;">
+                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
+                    <table class="compact-table">
+                        <tr><td><strong>Domain Name</strong></td><td>{whois.get('domain_name', 'N/A')}</td></tr>
+                        <tr><td><strong>Registrar</strong></td><td>{whois.get('registrar', 'N/A')}</td></tr>
+                        <tr><td><strong>Creation Date</strong></td><td>{whois.get('creation_date', 'N/A')}</td></tr>
+                        <tr><td><strong>Expiration Date</strong></td><td>{whois.get('expiration_date', 'N/A')}</td></tr>
+                        <tr><td><strong>Name Servers</strong></td><td><ul>{name_servers_html}</ul></td></tr>
+                        <tr><td><strong>DNSSEC Status</strong></td><td>{whois.get('dnssec_status', 'N/A')}</td></tr>
+                        <tr><td><strong>Registrant Org</strong></td><td>{whois.get('registrant_organization', 'N/A')}</td></tr>
+                        <tr><td><strong>Registrant Country</strong></td><td>{whois.get('registrant_country', 'N/A')}</td></tr>
+                    </table>
+                </div>
             </div>
         </div>
         """
@@ -183,7 +186,6 @@ class ReportGenerator:
         """
 
     def _generate_service_section(self):
-        # --- CHANGE START: Updated to match new finaljson.py format ---
         services = self.data.get('services', [])
         rows_html = ""
         for s in services:
@@ -212,7 +214,6 @@ class ReportGenerator:
             </div>
         </div>
         """
-        # --- CHANGE END ---
 
     def _generate_nmap_section(self):
         nmap = self.data.get('nmap', {})
@@ -298,6 +299,7 @@ class ReportGenerator:
         """
 
     def _get_embedded_template(self, header, executive_summary, body, footer):
+        # --- CHANGE START: Added Google Font import and interactive hover styles ---
         return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -305,6 +307,9 @@ class ReportGenerator:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VAJRA Security Report - {self.target}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {{
@@ -319,7 +324,7 @@ class ReportGenerator:
             --security-bg: linear-gradient(135deg, #d6d8d9 0%, #c6c8ca 100%);
         }}
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{ font-family: 'Segoe UI', sans-serif; line-height: 1.6; background: linear-gradient(135deg, #0f0f0f, #1a2a6c, #b21f1f); color: #333; min-height: 100vh; position: relative; overflow-x: hidden; }}
+        body {{ font-family: 'Montserrat', sans-serif; line-height: 1.6; background: linear-gradient(135deg, #0f0f0f, #1a2a6c, #b21f1f); color: #333; min-height: 100vh; position: relative; overflow-x: hidden; }}
         body::before {{ content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1544890225-2f3faec4cd60?w=500&h=500&fit=crop') center/cover, url('https://images.unsplash.com/photo-1563207153-f403bf289096?w=500&h=500&fit=crop') 20% 30%/cover, url('https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=500&h=500&fit=crop') 80% 70%/cover; background-blend-mode: overlay; opacity: 0.05; pointer-events: none; z-index: -1; }}
         .container {{ max-width: 1400px; margin: 0 auto; padding: 20px; }}
         .fixed-header {{ position: fixed; top: 0; left: 0; right: 0; background: var(--header-gradient); padding: 15px 20px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: all 0.3s ease; backdrop-filter: blur(10px); }}
@@ -333,7 +338,7 @@ class ReportGenerator:
         .sidebar.open {{ left: 0; box-shadow: -5px 0 25px rgba(0,0,0,0.3); }}
         .close-sidebar {{ position: absolute; top: 15px; left: 15px; background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; }}
         .nav-item {{ display: flex; align-items: center; gap: 15px; padding: 15px; color: white; text-decoration: none; border-radius: 8px; margin-bottom: 10px; transition: all 0.3s ease; cursor: pointer; }}
-        .nav-item:hover {{ background: rgba(255,255,255,0.2); transform: translateX(-5px); }}
+        .nav-item:hover {{ background: rgba(255,255,255,0.2); transform: translateX(-5px) scale(1.03); }}
         .nav-item i {{ font-size: 1.2em; width: 25px; text-align: center; }}
         .header {{ background: rgba(255,255,255,0.98); padding: 30px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); margin: 80px 0 30px 0; text-align: center; border: 1px solid rgba(0,0,0,0.1); }}
         .vajra-title {{ background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5em; font-weight: 800; text-transform: uppercase; animation: rainbow 8s ease-in-out infinite; }}
@@ -341,7 +346,8 @@ class ReportGenerator:
         .vajra-subtitle {{ color: var(--primary); font-size: 1.2em; font-weight: 600; margin-top: 5px; }}
         .report-title {{ color: var(--secondary); font-size: 2.2em; margin: 10px 0 15px 0; padding-top: 15px; border-top: 3px solid var(--accent); font-weight: 700; }}
         .scan-info {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }}
-        .info-item {{ padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: #fff; cursor: pointer; position: relative; }}
+        .info-item {{ padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: #fff; cursor: pointer; position: relative; transition: transform 0.3s ease; }}
+        .info-item:hover {{ transform: scale(1.05); }}
         .copy-badge {{ position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }}
         .info-item:hover .copy-badge {{ opacity: 1; }}
         .info-item.target {{ background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%); }}
@@ -368,7 +374,8 @@ class ReportGenerator:
         .code-block {{ position: relative; background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', monospace; overflow-x: auto; }}
         .copy-button, .table-copy {{ position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }}
         .service-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin: 15px 0; }}
-        .service-item {{ background: white; padding: 15px; border-radius: 8px; border-left: 4px solid var(--secondary); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }}
+        .service-item {{ background: white; padding: 15px; border-radius: 8px; border-left: 4px solid var(--secondary); box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.3s ease; }}
+        .service-item:hover {{ transform: scale(1.03); }}
         .service-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }}
         .service-port {{ font-weight: 700; color: var(--primary); }}
         .service-details {{ font-size: 0.9em; color: #6c757d; }}
@@ -376,7 +383,8 @@ class ReportGenerator:
         .url-header {{ background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%); color: white; padding: 12px; border-radius: 8px 8px 0 0; margin-top: 20px; font-weight: 600; }}
         .footer {{ text-align: center; margin-top: 40px; color: white; padding: 25px; background: rgba(0,0,0,0.3); border-radius: 15px; }}
         .contact-info {{ display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 15px; }}
-        .contact-link {{ color: #fff; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 0.9em; }}
+        .contact-link {{ color: #fff; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 0.9em; transition: transform 0.3s ease, background-color 0.3s ease; }}
+        .contact-link:hover {{ transform: scale(1.1); background: rgba(255,255,255,0.3); }}
         #backToTop {{ position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border: none; border-radius: 50%; font-size: 22px; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 1100; }}
         #backToTop.show {{ display: flex; }}
         @media print {{
@@ -460,6 +468,7 @@ class ReportGenerator:
 </body>
 </html>
         """
+        # --- CHANGE END ---
 
 def generate_report(target, target_dir, module_choices):
     """
@@ -476,4 +485,3 @@ def generate_report(target, target_dir, module_choices):
         if html_content:
             return report_gen.save_report(html_content)
     return False
-
