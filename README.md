@@ -23,9 +23,7 @@ This repository contains an interactive tool that orchestrates several reconnais
 Create and activate a virtual environment, then install dependencies:
 
 ```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+gitclone https://github.com/instroyer/VAJRA.git
 ```
 
 ## Usage
@@ -33,7 +31,7 @@ pip install -r requirements.txt
 Start the tool from the repository root:
 
 ```powershell
-python vajra.py
+python3 vajra.py
 ```
 
 The application provides an interactive menu (see `Engine/menu.py`) to run modules and collect results. Configuration is read from `config.py`.
