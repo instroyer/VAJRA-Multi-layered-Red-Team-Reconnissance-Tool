@@ -54,7 +54,7 @@ def nmap_submenu(input_func=None):
                 continue
 
             # Ask for report generation after selecting scan type
-            report_choice = prompt("Do you want to generate a report? (y/n) [n] > ").strip().lower()
+            report_choice = prompt("Do you want to generate a report? (y/n) > ").strip().lower()
             if not report_choice:
                 generate_report_flag = False
             else:

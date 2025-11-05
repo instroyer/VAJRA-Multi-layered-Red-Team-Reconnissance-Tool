@@ -292,7 +292,7 @@ class ReportGenerator:
             <div class="contact-info">
                 <a href="mailto:yashjaviya1111@gmail.com" class="contact-link"><i class="fas fa-envelope"></i> Email</a>
                 <a href="tel:+919999999999" class="contact-link"><i class="fas fa-phone"></i> Contact</a>
-                <a href="https://github.com/yashjaviya111" class="contact-link" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://github.com/instroyer" class="contact-link" target="_blank"><i class="fab fa-github"></i> GitHub</a>
                 <a href="https://www.linkedin.com/in/yash--javiya/" class="contact-link" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
             </div>
         </div>
