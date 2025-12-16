@@ -33,7 +33,7 @@ def nmap_submenu(input_func=None):
 
     print(nmap_menu)
 
-    # Clear any existing input buffer first
+   
     try:
         clear_input_buffer()
     except:
@@ -41,9 +41,8 @@ def nmap_submenu(input_func=None):
 
     while True:
         try:
-            # use prompt() so caller can inject safe_input
             choice = prompt("Choose scan type (1-4) [1] > ").strip()
-            # Handle empty input (just pressing Enter) - default to quick scan
+
             if not choice:
                 scan_type = 'quick'
             elif choice in ['1', '2', '3', '4']:
@@ -53,7 +52,6 @@ def nmap_submenu(input_func=None):
                 error("Invalid choice. Please select 1-4.")
                 continue
 
-            # Ask for report generation after selecting scan type
             report_choice = prompt("Do you want to generate a report? (y/n) > ").strip().lower()
             if not report_choice:
                 generate_report_flag = False
@@ -81,7 +79,6 @@ def run(target, output_dir, runtime_control=None, is_auto_mode=False):
     """
     info("--- Starting module: Nmap ---")
 
-    # Use the integrated submenu to get user choices, unless in auto mode
     if is_auto_mode:
         info("Auto mode: Using default Quick Scan (Option 1)")
         scan_type = 'quick'
@@ -91,7 +88,6 @@ def run(target, output_dir, runtime_control=None, is_auto_mode=False):
 
     logs_dir = _ensure_logs_dir(output_dir)
 
-    # Define commands and output paths based on the chosen scan_type
     out_paths = {
         'quick': (os.path.join(logs_dir, "nmap_top1000.txt"), os.path.join(logs_dir, "nmap_top1000.xml")),
         'full': (os.path.join(logs_dir, "nmap_full.txt"), os.path.join(logs_dir, "nmap_full.xml")),
@@ -106,7 +102,6 @@ def run(target, output_dir, runtime_control=None, is_auto_mode=False):
         'udp': ["nmap", target, "-T4", "-sU", "--top-ports", "100"]
     }
 
-    # Get the command and output files for the selected scan type
     if scan_type not in commands:
         error(f"Invalid scan type: {scan_type}")
         return
@@ -114,20 +109,17 @@ def run(target, output_dir, runtime_control=None, is_auto_mode=False):
     command = commands.get(scan_type)
     out_n, out_x = out_paths.get(scan_type)
 
-    # Add the output file flags to the command
     command.extend(["-oN", out_n, "-oX", out_x])
 
     try:
         info(f"Running: {' '.join(command)}")
         
-        # Execute Nmap scan
         result = subprocess.run(command, capture_output=True, text=True)
 
         if result.returncode == 0:
             info(f"Nmap {scan_type} scan completed.")
             info(f"Output: {out_n}")
 
-            # Trigger report generation if the user requested it
             if nmap_report_enabled:
                 info("Generating HTML report...")
                 # We pass "5" because that's the module choice for Nmap from the main menu

@@ -15,16 +15,14 @@ def run(target, output_dir, report_enabled=False):
     try:
         # Handle file input (@filename.txt)
         if target.startswith('@'):
-            file_path = target[1:]  # Remove the @ symbol
+            file_path = target[1:] 
             if not os.path.isfile(file_path):
                 error(f"File not found: {file_path}")
                 return False
             
-            # Use the file directly with eyewitness
             command = f"eyewitness --web --timeout 30 --threads 500 --prepend-https -f {file_path} -d {output_dir}/Screenshots/ --no-prompt"
         
         else:
-            # Single target - use direct URL
             if not target.startswith(('http://', 'https://')):
                 target_url = f"https://{target}"
             else:

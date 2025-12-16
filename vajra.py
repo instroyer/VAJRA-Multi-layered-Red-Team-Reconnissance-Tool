@@ -27,7 +27,6 @@ def path_completer(text, state):
         prefix = ""
     # Find matches
     matches = glob.glob(text + '*')
-    # Add appropriate suffix based on whether it's a directory or file
     completed_matches = []
     for match in matches:
         if os.path.isdir(match):
@@ -39,9 +38,7 @@ def path_completer(text, state):
         return completed_matches[state]
     else:
         return None
-# Set the completer
 readline.set_completer(path_completer)
-# Now import using absolute paths that work from this directory
 try:
     from Engine.banner import display_banner
     from Engine.logger import info, success, warning, error, target_info
@@ -162,7 +159,7 @@ def main():
                 elif module_choices == '6': # Eyewitness only - skip report prompt
                     report_enabled = False
                 
-                # --- THIS IS THE LOGIC CHANGE YOU REQUESTED ---
+
                 else:
                     # Get the set of modules the user actually chose
                     chosen_modules = set(module_choices.split())
@@ -182,12 +179,9 @@ def main():
                         report_enabled = False
                 # --- END OF LOGIC CHANGE ---
 
-                # Process all targets with the same module selection and report preference
                 process_targets(targets, module_choices, report_enabled, is_file_input, file_name)
                 break # Break out of module selection loop after processing
             
-            # --- CORRECTED INDENTATION: This block is now INSIDE the main "while True" loop ---
-            # After finishing all targets, ask if user wants to scan NEW targets
             try:
                 new_target = get_input("\nScan new targets? (y/n) > ").strip().lower()
                 if new_target != 'y':
@@ -196,7 +190,6 @@ def main():
             except KeyboardInterrupt:
                 success("Thank you for using VAJRA. Exiting.")
                 break # Break out of main program loop
-            # --- END OF FIX ---
             
     except KeyboardInterrupt:
         info("\nOperation cancelled by user. Exiting.")

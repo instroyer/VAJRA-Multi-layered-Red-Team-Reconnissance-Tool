@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAJRA Security Report - acunetix.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50; --secondary: #3498db; --accent: #e74c3c; --success: #27ae60;
+            --warning: #f39c12; --danger: #c0392b; --light: #ecf0f1; --dark: #2c3e50;
+            --header-gradient: linear-gradient(135deg, #fdbb2d, #b21f1f, #1a2a6c);
+            --executive-bg: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            --domain-bg: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            --subdomain-bg: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
+            --service-bg: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            --network-bg: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            --security-bg: linear-gradient(135deg, #d6d8d9 0%, #c6c8ca 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; line-height: 1.6; background: linear-gradient(135deg, #0f0f0f, #1a2a6c, #b21f1f); color: #333; min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1544890225-2f3faec4cd60?w=500&h=500&fit=crop') center/cover, url('https://images.unsplash.com/photo-1563207153-f403bf289096?w=500&h=500&fit=crop') 20% 30%/cover, url('https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=500&h=500&fit=crop') 80% 70%/cover; background-blend-mode: overlay; opacity: 0.05; pointer-events: none; z-index: -1; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .fixed-header { position: fixed; top: 0; left: 0; right: 0; background: var(--header-gradient); padding: 15px 20px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: all 0.3s ease; backdrop-filter: blur(10px); }
+        .fixed-header.small { padding: 10px 20px; }
+        .fixed-header-title { display: flex; align-items: center; gap: 15px; width: 100%; justify-content: center; }
+        .fixed-vajra { background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; animation: rainbow 8s ease-in-out infinite; }
+        .fixed-subtitle { color: white; font-size: 0.9em; opacity: 0.9; display: none; }
+        .fixed-header.small .fixed-subtitle { display: block; }
+        .menu-toggle { background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.3s ease; position: absolute; left: 20px; }
+        .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background: linear-gradient(135deg, rgba(26,42,108,0.98) 0%, rgba(178,31,31,0.98) 100%); z-index: 1001; padding: 80px 20px 20px 20px; transition: all 0.3s ease; backdrop-filter: blur(10px); overflow-y: auto; }
+        .sidebar.open { left: 0; box-shadow: -5px 0 25px rgba(0,0,0,0.3); }
+        .close-sidebar { position: absolute; top: 15px; left: 15px; background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; }
+        .nav-item { display: flex; align-items: center; gap: 15px; padding: 15px; color: white; text-decoration: none; border-radius: 8px; margin-bottom: 10px; transition: all 0.3s ease; cursor: pointer; }
+        .nav-item:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px) scale(1.03); }
+        .nav-item i { font-size: 1.2em; width: 25px; text-align: center; }
+        .header { background: rgba(255,255,255,0.98); padding: 30px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); margin: 80px 0 30px 0; text-align: center; border: 1px solid rgba(0,0,0,0.1); }
+        .vajra-title { background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5em; font-weight: 800; text-transform: uppercase; animation: rainbow 8s ease-in-out infinite; }
+        @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        .vajra-subtitle { color: var(--primary); font-size: 1.2em; font-weight: 600; margin-top: 5px; }
+        .report-title { color: var(--secondary); font-size: 2.2em; margin: 10px 0 15px 0; padding-top: 15px; border-top: 3px solid var(--accent); font-weight: 700; }
+        .scan-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
+        .info-item { padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: #fff; cursor: pointer; position: relative; transition: transform 0.3s ease; }
+        .info-item:hover { transform: scale(1.05); }
+        .copy-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .info-item:hover .copy-badge { opacity: 1; }
+        .info-item.target { background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%); }
+        .info-item.date { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+        .info-item.risk { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .info-item h3 { margin-bottom: 8px; font-size: 1.1em; }
+        .info-item p { font-size: 1em; font-weight: 600; }
+        .section { background: rgba(255,255,255,0.97); padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 25px; border-left: 5px solid; }
+        .section.executive { background: var(--executive-bg); border-left-color: #ffc107; } .section.domain { background: var(--domain-bg); border-left-color: #28a745; }
+        .section.subdomain { background: var(--subdomain-bg); border-left-color: #007bff; } .section.service { background: var(--service-bg); border-left-color: #17a2b8; }
+        .section.network { background: var(--network-bg); border-left-color: #dc3545; } .section.security { background: var(--security-bg); border-left-color: #6c757d; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.8em; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--accent); color: var(--primary); }
+        .toggle-btn { background: none; border: none; color: var(--dark); font-size: 1rem; cursor: pointer; transition: transform 0.3s ease; }
+        .toggle-btn i { transition: transform 0.3s ease; }
+        .section.collapsed .toggle-btn i { transform: rotate(180deg); }
+        .section.collapsed .section-content { display: none; }
+        .compact-table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .compact-table th { background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%); color: white; padding: 12px; text-align: left; font-weight: 600; }
+        .compact-table td { padding: 10px 12px; border-bottom: 1px solid #dee2e6; }
+        .compact-table td ul { padding-left: 20px; }
+        .compact-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.85em; font-weight: 600; }
+        .status-200 { background: #d4edda; color: #155724; } .status-302 { background: #fff3cd; color: #856404; } .status-404 { background: #f8d7da; color: #721c24; }
+        .code-block { position: relative; background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', monospace; overflow-x: auto; }
+        .copy-button, .table-copy { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
+        .service-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin: 15px 0; }
+        .service-item { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid var(--secondary); box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
+        .service-item:hover { transform: scale(1.03); }
+        .service-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .service-port { font-weight: 700; color: var(--primary); }
+        .service-details { font-size: 0.9em; color: #6c757d; }
+        .service-recommendation { margin-top: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--warning); font-size: 0.85em; }
+        .url-header { background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%); color: white; padding: 12px; border-radius: 8px 8px 0 0; margin-top: 20px; font-weight: 600; }
+        .footer { text-align: center; margin-top: 40px; color: white; padding: 25px; background: rgba(0,0,0,0.3); border-radius: 15px; }
+        .contact-info { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+        .contact-link { color: #fff; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 0.9em; transition: transform 0.3s ease, background-color 0.3s ease; }
+        .contact-link:hover { transform: scale(1.1); background: rgba(255,255,255,0.3); }
+        #backToTop { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border: none; border-radius: 50%; font-size: 22px; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 1100; }
+        #backToTop.show { display: flex; }
+        @media print {
+            @page { size: A4; margin: 15mm; }
+            body {
+                font-size: 10pt;
+                background: #fff !important;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            .fixed-header, .sidebar, #backToTop, .copy-button, .table-copy, .toggle-btn, .copy-badge { display: none !important; }
+            .section:not(#executive-summary) { page-break-before: always; }
+            .container { max-width: 100%; padding: 0; margin: 0; }
+            .header, .section, .footer {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                background: #fff !important;
+                padding: 15px;
+                border-radius: 0 !important;
+            }
+            .vajra-title { font-size: 2.5em; -webkit-text-fill-color: var(--primary); background: none; animation: none; }
+            .report-title { font-size: 1.8em; }
+            .section-header { font-size: 1.5em; padding-bottom: 8px; margin-bottom: 15px; }
+            .scan-info { grid-template-columns: repeat(3, 1fr); }
+            .info-item, .info-item.target, .info-item.date, .info-item.risk {
+                background: #f0f0f0 !important;
+                border: 1px solid #ccc;
+                color: #000 !important;
+            }
+            .info-item h3, .info-item p { color: #000 !important; }
+            a { color: var(--secondary); text-decoration: none; }
+            .footer { background: none !important; color: #333 !important; border-top: 1px solid #ccc; }
+            .contact-info { display: flex !important; justify-content: center; }
+            .contact-link { background: #f0f0f0 !important; color: #333 !important; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed-header" id="fixedHeader">
+        <div class="fixed-header-title">
+            <div class="fixed-vajra">VAJRA</div>
+            <div class="fixed-subtitle">Multi-layered Red Team Reconnaissance Framework</div>
+        </div>
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+    </div>
+    <div class="sidebar" id="sidebar">
+        <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+        <div class="nav-item" onclick="scrollToSection('executive-summary')"><i class="fas fa-chart-line"></i> Executive Summary</div>
+        <div class="nav-item" onclick="scrollToSection('domain-analysis')"><i class="fas fa-globe"></i> Domain Analysis</div>
+        <div class="nav-item" onclick="scrollToSection('subdomain-mapping')"><i class="fas fa-sitemap"></i> Subdomain Mapping</div>
+        <div class="nav-item" onclick="scrollToSection('service-discovery')"><i class="fas fa-heartbeat"></i> Service Discovery</div>
+        <div class="nav-item" onclick="scrollToSection('network-analysis')"><i class="fas fa-network-wired"></i> Network Analysis</div>
+        <div class="nav-item" onclick="scrollToSection('security-recommendations')"><i class="fas fa-clipboard-check"></i> Security Recommendations</div>
+        <div class="nav-item" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</div>
+    </div>
+    <div class="container">
+        
+        <div class="header">
+            <div class="header-top">
+                <div>
+                    <div class="vajra-title">VAJRA</div>
+                    <div class="vajra-subtitle">Multi-layered Red Team Reconnaissance Framework</div>
+                </div>
+            </div>
+            <div class="report-title">Comprehensive Security Assessment Report</div>
+            <div class="scan-info">
+                <div class="info-item target" onclick="copyToClipboard('acunetix.com')">
+                    <span class="copy-badge"><i class="fas fa-copy"></i></span>
+                    <h3><i class="fas fa-bullseye"></i> Target</h3>
+                    <p>acunetix.com</p>
+                </div>
+                <div class="info-item date">
+                    <h3><i class="fas fa-calendar-alt"></i> Scan Date</h3>
+                    <p id="scanDateDisplay">2025-11-07 23:19:51</p>
+                </div>
+                <div class="info-item risk">
+                    <h3><i class="fas fa-shield-alt"></i> Risk Level</h3>
+                    <p>N/A</p>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="section executive" id="executive-summary">
+            <h2 class="section-header">
+                <div><i class="fas fa-chart-line"></i> Executive Summary</div>
+                 <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+            <div class="section-content">
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <code>This report summarizes the findings from the reconnaissance scan performed by the VAJRA framework.</code>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="section network" id="network-analysis">
+            <h2 class="section-header">
+                <div><i class="fas fa-network-wired"></i> Network Infrastructure Analysis</div>
+                <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+            <div class="section-content">
+                <div class="code-block"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>Scan Type: SYN | Total Open Ports: 4</code></div>
+                <div class='url-header'>acunetix.com (104.18.11.224)</div><div class='service-grid'>
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 80/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                    </div>
+                    <div class="service-details">N/A</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 443/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                    </div>
+                    <div class="service-details">N/A</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 8080/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                    </div>
+                    <div class="service-details">N/A</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 8443/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                    </div>
+                    <div class="service-details">N/A</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section security" id="security-recommendations">
+            <h2 class="section-header">
+                <div><i class="fas fa-clipboard-check"></i> Security Recommendations</div>
+                <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+            <div class="section-content">
+                <div class="code-block"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>Priority Actions: Review all findings and prioritize remediation based on risk.</code></div>
+                 <div style="position: relative;">
+                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
+                    <table class="compact-table">
+                        <thead><tr><th>Priority</th><th>Recommendation</th><th>Timeline</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><span style="color: var(--accent);">High</span></td>
+                                <td>Address all critical and high-risk findings from the Network Analysis section immediately.</td>
+                                <td>Immediate</td>
+                            </tr>
+                            <tr>
+                                <td><span style="color: var(--warning);">Medium</span></td>
+                                <td>Review web service configurations for security headers (HSTS, CSP) and updated software versions.</td>
+                                <td>1-2 Weeks</td>
+                            </tr>
+                            <tr>
+                                <td><span style="color: var(--success);">Low</span></td>
+                                <td>Regularly review domain registration details for accuracy and ensure DNSSEC is enabled.</td>
+                                <td>Ongoing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="footer">
+            <p><strong>Generated by VAJRA Framework - Multi-layered Red Team Reconnaissance Framework</strong></p>
+            <p>Owner: Yash Javiya | Penetration Tester</p>
+            <div class="contact-info">
+                <a href="mailto:yashjaviya1111@gmail.com" class="contact-link"><i class="fas fa-envelope"></i> Email</a>
+                <a href="tel:+919999999999" class="contact-link"><i class="fas fa-phone"></i> Contact</a>
+                <a href="https://github.com/instroyer" class="contact-link" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://www.linkedin.com/in/yash--javiya/" class="contact-link" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
+            </div>
+        </div>
+        
+    </div>
+    <button id="backToTop" title="Go to top"><i class="fas fa-arrow-up"></i></button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fixedHeader = document.getElementById('fixedHeader');
+            window.addEventListener('scroll', () => { window.scrollY > 100 ? fixedHeader.classList.add('small') : fixedHeader.classList.remove('small'); });
+            document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+            document.getElementById('closeSidebar').addEventListener('click', () => document.getElementById('sidebar').classList.remove('open'));
+            const backToTopBtn = document.getElementById("backToTop");
+            window.addEventListener("scroll", () => { window.scrollY > 200 ? backToTopBtn.classList.add("show") : backToTopBtn.classList.remove("show"); });
+            backToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+        });
+        function scrollToSection(sectionId) { const el = document.getElementById(sectionId); if (el) { el.scrollIntoView({ behavior: 'smooth' }); document.getElementById('sidebar').classList.remove('open'); } }
+        function downloadPDF() { window.print(); }
+        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert('Copied: ' + text), () => alert('Failed to copy')); }
+        function copyCode(btn) { const code = btn.parentElement.querySelector('code').textContent; copyToClipboard(code); }
+        function copyTable(btn) { const table = btn.nextElementSibling; let text = ''; for (const row of table.rows) { let rowText = []; for(const cell of row.cells) { rowText.push(cell.textContent); } text += rowText.join('\t') + '\n'; } copyToClipboard(text); }
+        function toggleSection(btn) { const section = btn.closest('.section'); section.classList.toggle('collapsed'); }
+    </script>
+</body>
+</html>
+        

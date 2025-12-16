@@ -1,6 +1,5 @@
 #VAJRA/Engine/runtime.py
-# Improved runtime control: run each module in a separate process and allow
-# pausing/resuming/skipping/quit via POSIX signals.
+
 import importlib
 import multiprocessing
 import threading
@@ -11,7 +10,6 @@ import os
 import signal
 from .logger import info, error, success, warning
 #
-# RuntimeControl: manages listener thread + simple process control helpers
 #
 class RuntimeControl:
     """Background listener that watches stdin for the '00' trigger and exposes
@@ -61,8 +59,7 @@ class RuntimeControl:
                     os.kill(self.current_pid, signal.SIGSTOP)
                 except Exception as e:
                     warning(f"Could not SIGSTOP pid {self.current_pid}: {e}")
-    
-    # --- CHANGE START ---
+
     def resume_module(self):
         if self.current_module and self.module_paused:
             self.module_paused = False
@@ -74,7 +71,6 @@ class RuntimeControl:
                     info(f"Process (PID: {self.current_pid}) is running. Type '00' for menu.")
                 except Exception as e:
                     warning(f"Could not SIGCONT pid {self.current_pid}: {e}")
-    # --- CHANGE END ---
 
     def skip_module(self):
         if self.current_module:
@@ -189,7 +185,6 @@ Enter choice: """
         self.current_pid = None
         self.current_module = None
 #
-# execute_modules: runs each module in its own process and allows runtime control
 #
 def execute_modules(module_choices, target, target_dir, report_enabled):
     module_map = {

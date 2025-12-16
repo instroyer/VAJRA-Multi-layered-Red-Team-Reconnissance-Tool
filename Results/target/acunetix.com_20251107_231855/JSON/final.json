@@ -1,0 +1,50 @@
+{
+    "scan_info": {
+        "target": "acunetix.com",
+        "scan_date": "2025-11-07 23:19:51",
+        "risk_level": "N/A"
+    },
+    "nmap": {
+        "scan_summary": {
+            "scan_type": "SYN",
+            "duration": "Fri Nov  7 23:19:51 2025",
+            "total_open_ports": 4
+        },
+        "hosts": [
+            {
+                "hostname": "acunetix.com",
+                "ip_address": "104.18.11.224",
+                "open_ports": [
+                    {
+                        "port_id": "80",
+                        "protocol": "tcp",
+                        "service_name": "tcpwrapped",
+                        "service_version": "N/A",
+                        "recommendation": "Review service configuration for security best practices."
+                    },
+                    {
+                        "port_id": "443",
+                        "protocol": "tcp",
+                        "service_name": "tcpwrapped",
+                        "service_version": "N/A",
+                        "recommendation": "Review service configuration for security best practices."
+                    },
+                    {
+                        "port_id": "8080",
+                        "protocol": "tcp",
+                        "service_name": "tcpwrapped",
+                        "service_version": "N/A",
+                        "recommendation": "Review service configuration for security best practices."
+                    },
+                    {
+                        "port_id": "8443",
+                        "protocol": "tcp",
+                        "service_name": "tcpwrapped",
+                        "service_version": "N/A",
+                        "recommendation": "Review service configuration for security best practices."
+                    }
+                ]
+            }
+        ]
+    }
+}

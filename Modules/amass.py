@@ -4,7 +4,6 @@ import subprocess
 import os
 import sys
 
-# Add the parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from Engine.logger import info, error
@@ -14,7 +13,7 @@ def run(target, output_dir):
     try:
         log_file = f"{output_dir}/Logs/amass.txt"
         
-        # Simple command without timeout parameter
+       
         command = f"amass enum -d {target} -o {log_file}"
         info(f"Running: {command}")
         

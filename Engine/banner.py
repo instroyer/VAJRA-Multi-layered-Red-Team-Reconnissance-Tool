@@ -1,19 +1,5 @@
 '''
-def display():
-    """Display the VAJRA ASCII banner."""
-    banner_text = """
-    ██╗   ██╗ █████╗ ██╗   ██╗██████╗  █████╗
-    ██║   ██║██╔══██╗██║   ██║██╔══██╗██╔══██╗
-    ██║   ██║███████║██║   ██║██████╔╝███████║
-    ╚██╗ ██╔╝██╔══██║██║   ██║██╔══██╗██╔══██║
-     ╚████╔╝ ██║  ██║╚██████╔╝██║  ██║██║  ██║
-      ╚═══╝  ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
-    Multi-layered Red Team Reconnaissance Framework
-    """
-    print(banner_text)
-'''
 
-'''
 # VAJRA Rainbow ASCII Banner
 import colorama
 from colorama import Fore, Style
@@ -36,6 +22,8 @@ def display_banner():
     print(banner)
 '''
 
+
+
 # VAJRA Rainbow ASCII Banner
 import colorama
 from colorama import Fore, Style
@@ -56,3 +44,4 @@ def display_banner():
 {Style.RESET_ALL}
     """
     print(banner)
+

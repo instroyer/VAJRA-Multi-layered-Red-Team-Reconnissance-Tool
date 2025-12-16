@@ -5,7 +5,7 @@ import subprocess
 import os
 import sys
 
-# Add the parent directory to path for imports
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from Engine.logger import info, success, error
@@ -47,7 +47,7 @@ def run(target, output_dir):
         else:
             # Input is a single domain/IP
             command = f"echo {target} | httpx-toolkit -json -o {json_output}"
-        # --- CHANGE END ---
+       
 
         info(f"Running: {command}")
         # Using a longer timeout for potentially large lists
