@@ -40,14 +40,14 @@ The application provides an interactive menu (see `Engine/menu.py`) to run modul
 
 The `Modules/` folder contains integration wrappers for common recon tools and scanners. Example modules included:
 
-- `amass.py` — subdomain enumeration via Amass.
-- `subfinder.py` — subdomain finding.
-- `nmap.py` — port/service scanning and OS detection.
-- `whois.py` — domain WHOIS lookups.
-- `httpx.py` — HTTP probing for responsive hosts.
-- `screenshot.py` — webpage screenshotting.
+- `whois` — domain WHOIS lookups.
+- `amass` — subdomain enumeration via Amass.
+- `subfinder` — subdomain finding.
+- `nmap` — port/service scanning and OS detection.
+- `httpx` — HTTP probing for responsive hosts.
+- `screenshot` — webpage screenshotting.
 
-Each module is designed to be called by the engine; see `Engine/runtime.py` and `Engine/menu.py` for orchestration logic.
+Each module is designed for orchestration logic.
 
 ## Results & Reports
 
