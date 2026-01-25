@@ -1,4 +1,4 @@
-# File and directory operations for VAJRA
+# File and directory operations for KESTREL
 import os
 from datetime import datetime
 from .logger import info, error

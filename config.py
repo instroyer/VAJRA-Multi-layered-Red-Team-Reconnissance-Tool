@@ -1,4 +1,4 @@
-# VAJRA Configuration Settings
+# KESTREL Configuration Settings
 # API keys, tool paths, default parameters, output preferences
 
 import os
@@ -7,6 +7,7 @@ import os
 TOOL_PATHS = {
     'whois': 'whois',           # Default system whois
     'subfinder': 'subfinder',
+    'dig': 'dig',
     'amass': 'amass',
     'httpx': 'httpx',
     'nmap': 'nmap',

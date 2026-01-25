@@ -1,4 +1,4 @@
-# VAJRA/Engine/finaljson.py
+# KESTREL/Engine/finaljson.py
 # Description: Parses raw tool outputs and assembles them into a structured final.json file.
 
 import os
@@ -10,7 +10,7 @@ from urllib.parse import urlparse  # added to parse host from URL
 
 class FinalJsonGenerator:
     """
-    Parses various log files from a VAJRA scan and creates a consolidated JSON output.
+    Parses various log files from a KESTREL scan and creates a consolidated JSON output.
     """
     def __init__(self, target, target_dir):
         self.target = target
@@ -192,6 +192,11 @@ class FinalJsonGenerator:
         if whois_data:
             self.final_data['whois'] = whois_data
 
+        if self._check_log('dig.json'):
+            self.final_data['dns'] = self._parse_json_log('dig.json')
+            if self.final_data['dns']:
+                info("Parsed DNS (Dig) results.")
+
         subdomain_data = self.parse_subdomains()
         if subdomain_data:
             self.final_data['subdomains'] = subdomain_data
@@ -267,9 +272,22 @@ class FinalJsonGenerator:
             return "Telnet is insecure. Disable and use SSH instead."
         return "Review service configuration for security best practices."
 
+    def _check_log(self, filename):
+        """Checks if a log file exists."""
+        return os.path.exists(os.path.join(self.log_dir, filename))
+
+    def _parse_json_log(self, filename):
+        """Generic JSON parser for simple log files."""
+        try:
+            with open(os.path.join(self.log_dir, filename), 'r') as f:
+               return json.load(f)
+        except Exception as e:
+            error(f"Could not parse {filename}: {e}")
+            return None
+
 def create_final_json(target, target_dir):
     """
-    Entry point function to be called by other parts of the VAJRA engine.
+    Entry point function to be called by other parts of the KESTREL engine.
     """
     generator = FinalJsonGenerator(target, target_dir)
     return generator.generate()

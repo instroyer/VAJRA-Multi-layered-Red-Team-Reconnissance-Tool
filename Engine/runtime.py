@@ -1,4 +1,4 @@
-#VAJRA/Engine/runtime.py
+#KESTREL/Engine/runtime.py
 
 import importlib
 import multiprocessing
@@ -22,7 +22,6 @@ class RuntimeControl:
         self.thread = None
         self.runtime_menu_active = False
         # runtime state
-        self.module_paused = False
         self.skip_current = False
         self.quit_program = False
         self.current_module = None
@@ -50,28 +49,6 @@ class RuntimeControl:
         """Set the PID of the currently running module process (or None)."""
         self.current_pid = pid
     #----- high level commands
-    def pause_module(self):
-        if self.current_module:
-            self.module_paused = True
-            info(f"Module '{self.current_module}' PAUSED (will suspend process).")
-            if self.current_pid:
-                try:
-                    os.kill(self.current_pid, signal.SIGSTOP)
-                except Exception as e:
-                    warning(f"Could not SIGSTOP pid {self.current_pid}: {e}")
-
-    def resume_module(self):
-        if self.current_module and self.module_paused:
-            self.module_paused = False
-            info(f"Module '{self.current_module}' RESUMED (will continue process).")
-            if self.current_pid:
-                try:
-                    os.kill(self.current_pid, signal.SIGCONT)
-                    # This new line gives you the feedback you wanted
-                    info(f"Process (PID: {self.current_pid}) is running. Type '00' for menu.")
-                except Exception as e:
-                    warning(f"Could not SIGCONT pid {self.current_pid}: {e}")
-
     def skip_module(self):
         if self.current_module:
             self.skip_current = True
@@ -83,7 +60,7 @@ class RuntimeControl:
                     warning(f"Could not SIGTERM pid {self.current_pid}: {e}")
     def quit_execution(self):
         self.quit_program = True
-        info("Quit requested. Terminating VAJRA run.")
+        info("Quit requested. Terminating KESTREL run.")
         if self.current_pid:
             try:
                 os.kill(self.current_pid, signal.SIGTERM)
@@ -111,21 +88,15 @@ class RuntimeControl:
 {'='*40}
 [*] RUNTIME CONTROL MENU{current_module_display}
 {'='*40}
-[p] Pause current module
-[r] Resume paused module
 [s] Skip current module
-[q] Quit VAJRA entirely
+[q] Quit KESTREL entirely
 Any other key → Exit Runtime Menu
 {'='*40}
 Enter choice: """
         print(menu_text, end="", flush=True)
     def _process_runtime_command(self, command):
         command = command.lower().strip()
-        if command == 'p':
-            self.pause_module()
-        elif command == 'r':
-            self.resume_module()
-        elif command == 's':
+        if command == 's':
             self.skip_module()
         elif command == 'q':
             self.quit_execution()
@@ -143,21 +114,30 @@ Enter choice: """
             if self.runtime_menu_active:
                 time.sleep(0.1)
                 continue
+            
+            # Non-blocking read
             ch = self._get_char(timeout=0.05)
             if ch:
                 buffer += ch
-                if len(buffer) > 8:
-                    buffer = buffer[-8:]
-                if buffer.endswith("00\n") or buffer.endswith("00\r\n"):
+                # Keep buffer small to avoid memory issues with long running processes
+                if len(buffer) > 20: 
+                    buffer = buffer[-20:]
+                
+                # Check for "00" followed by any newline style
+                if "00\n" in buffer or "00\r" in buffer:
                     now = time.time()
+                    # Debounce
                     if now - self.last_trigger_time > 1.0:
                         self.last_trigger_time = now
                         self._clear_input_buffer()
                         self.runtime_menu_active = True
-                        buffer = ""
+                        buffer = "" # Reset buffer
+                        
                         self._display_runtime_menu()
                         try:
                             self.pause_listener()
+                            # Use input() here which is blocking, but we are in a thread
+                            # and we want to capture the full command now.
                             command = input().strip()
                             self._process_runtime_command(command)
                         except (KeyboardInterrupt, EOFError):
@@ -165,22 +145,26 @@ Enter choice: """
                             info("Runtime menu cancelled.")
                         finally:
                             self.resume_listener()
-                elif ch == '\n':
-                    buffer = ""
+                    else:
+                        # If triggered too fast, just clear buffer
+                        buffer = ""
+                
+                # Reset buffer on normal enter to prevent accidental later triggers
+                elif ch in ['\n', '\r']:
+                     if not buffer.endswith("00\n") and not buffer.endswith("00\r"):
+                        buffer = ""
+            
             time.sleep(0.05)
 
     def wait_if_paused(self):
-        while self.module_paused and not self.quit_program and not self.skip_current:
-            time.sleep(0.3)
-            if self.quit_program or self.skip_current:
-                break
+        # Pause feature removed, but keeping method stub to avoid breaking external calls if any remain
+        pass
 
     def should_skip_current(self):
         return self.skip_current
     def should_quit(self):
         return self.quit_program
     def reset_module_state(self):
-        self.module_paused = False
         self.skip_current = False
         self.current_pid = None
         self.current_module = None
@@ -189,14 +173,15 @@ Enter choice: """
 def execute_modules(module_choices, target, target_dir, report_enabled):
     module_map = {
         '1': {'file': 'whois', 'handler': 'run', 'name': 'Whois'},
-        '2': {'file': 'subfinder', 'handler': 'run', 'name': 'Subfinder'},
-        '3': {'file': 'amass', 'handler': 'run', 'name': 'Amass'},
-        '4': {'file': 'httpx', 'handler': 'run', 'name': 'HTTPX'},
-        '5': {'file': 'nmap', 'handler': 'run', 'name': 'Nmap'},
-        '6': {'file': 'screenshot', 'handler': 'run', 'name': 'Screenshot'}
+        '2': {'file': 'dig', 'handler': 'run', 'name': 'Dig (DNS)'},
+        '3': {'file': 'subfinder', 'handler': 'run', 'name': 'Subfinder'},
+        '4': {'file': 'amass', 'handler': 'run', 'name': 'Amass'},
+        '5': {'file': 'httpx_toolkit', 'handler': 'run', 'name': 'HTTPX'},
+        '6': {'file': 'nmap', 'handler': 'run', 'name': 'Nmap'},
+        '7': {'file': 'screenshot', 'handler': 'run', 'name': 'Screenshot'}
     }
     if '0' in module_choices:
-        choices = sorted(module_map.keys())
+        choices = sorted(module_map.keys(), key=lambda x: int(x))
     else:
         choices = module_choices.split()
     runtime_controller = RuntimeControl()
@@ -205,7 +190,7 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
     def _module_runner(choice, target, target_dir, is_auto_mode=False):
         try:
             # Re-open stdin in the child process if it's interactive Nmap
-            if choice == '5' and not is_auto_mode:
+            if choice == '6' and not is_auto_mode:
                 sys.stdin = open(0)
             
             module_info = module_map.get(choice)
@@ -218,13 +203,13 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
             handler_name = module_info['handler']
             handler = getattr(module, handler_name)
             if isinstance(handler, type):
-                if choice == '5' and is_auto_mode:
+                if choice == '6' and is_auto_mode:
                     instance = handler(target, target_dir, runtime_control=None, is_auto_mode=True)
                 else:
                     instance = handler(target, target_dir, runtime_control=None)
                 instance.run()
             else:
-                if choice == '5' and is_auto_mode:
+                if choice == '6' and is_auto_mode:
                     handler(target, target_dir, is_auto_mode=True)
                 else:
                     handler(target, target_dir)
@@ -247,7 +232,7 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
             continue
         try:
             # First, check if this is an interactive Nmap run
-            is_auto = ('0' in module_choices) and choice == '5'
+            is_auto = ('0' in module_choices) and choice == '6'
             
             runtime_controller.pause_listener()
             
@@ -261,8 +246,6 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
             proc.start()
             runtime_controller.set_current_pid(proc.pid)
             while proc.is_alive():
-                if runtime_controller.module_paused:
-                    pass
                 if runtime_controller.should_skip_current():
                     try:
                         os.kill(proc.pid, signal.SIGTERM)
@@ -302,7 +285,7 @@ def execute_modules(module_choices, target, target_dir, report_enabled):
     time.sleep(1)
     runtime_controller.stop()
     if runtime_controller.should_quit():
-        info("VAJRA terminated by user.")
+        info("KESTREL terminated by user.")
         return False
     else:
         #

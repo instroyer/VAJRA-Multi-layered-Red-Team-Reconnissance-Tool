@@ -6,6 +6,7 @@ from .logger import info, success, warning, error
 # List of required tools
 REQUIRED_TOOLS = {
     'whois': 'whois',
+    'dig': 'dig',
     'subfinder': 'subfinder',
     'amass': 'amass',
     'httpx': 'httpx-toolkit',
@@ -73,6 +74,12 @@ def install_dependencies(missing_tools):
                 for tool in missing_tools:
                     # Special handling for different package names
                     package_name = tool
+                    
+                    if tool == 'dig':
+                        if pm == 'apt':
+                            package_name = 'dnsutils'
+                        elif pm in ['pacman', 'dnf', 'yum']:
+                            package_name = 'bind-utils'
                     
                     # Handle package name variations
                     if tool == 'httpx-toolkit' and pm == 'apt':

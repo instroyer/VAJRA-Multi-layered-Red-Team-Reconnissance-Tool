@@ -1,0 +1,18 @@
+;; TYPE: A
+; No records found
+
+;; TYPE: AAAA
+; No records found
+
+;; TYPE: MX
+; No records found
+
+;; TYPE: NS
+; No records found
+
+;; TYPE: TXT
+; No records found
+
+;; TYPE: SOA
+; No records found
+

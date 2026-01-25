@@ -1,4 +1,4 @@
-# VAJRA/Modules/httpx.py
+# KESTREL/Modules/httpx_toolkit.py
 # Description: HTTPX module execution (using httpx-toolkit).
 
 import subprocess
@@ -8,7 +8,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from Engine.logger import info, success, error
+from Engine.logger import info, success, error, warning
 
 def extract_urls_from_json(json_file, output_file):
     """Extract clean URLs from httpx JSON output using jq and sed."""

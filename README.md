@@ -1,45 +1,96 @@
-# VAJRA
+<h1 align="center">
+  <br>
+  🦅 KESTREL
+  <br>
+</h1>
 
-> VAJRA is a Multi-layered Red Team Reconnisance tool implemented in Python.
+<h4 align="center">Multi-layered Reconnaissance Tool</h4>
 
-This repository contains an interactive tool that orchestrates several reconnaissance modules (amass, subfinder, nmap, whois, httpx, screenshot) and engine utilities to run scans and produce reports.
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#structure">Structure</a> •
+  <a href="#disclaimer">Disclaimer</a>
+</p>
 
-## Project structure
+<p align="center">
+  <img src="https://img.shields.io/badge/Language-Python3-blue?style=for-the-badge&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/Platform-Linux-lightgrey?style=for-the-badge&logo=linux" alt="Platform">
+  <img src="https://img.shields.io/badge/Focus-Reconnaissance-red?style=for-the-badge" alt="Focus">
+</p>
 
-- `vajra.py` - entry point for the application (run this to start the interactive menu).
-- `config.py` - global configuration and settings.
-- `requirements.txt` - Python dependencies.
-- `Engine/` - core runtime, utilities and reporting code (menu, runtime, report, file ops, logging, etc.).
-- `Modules/` - individual scanning/recon modules (amass, subfinder, nmap, whois, httpx, screenshot, ...).
-- `Results/` - output directory where scan results are stored.
+---
 
-## Requirements
+<p align="center">
+  <b>KESTREL</b> is an advanced, modular reconnaissance tool designed for red teamers and penetration testers. It automates the intelligence gathering process by orchestrating specific industry-standard tools into a unified, powerful pipeline.
+</p>
 
-- Python 3.8+ (recommended)
-- Dependencies listed in `requirements.txt`.
+## 🚀 Features
 
-## Installation
+*   **🔍 Multi-Layered Scan:** Seamlessly combines Whois, Subdomain Enumeration, Web Service Discovery, Port Scanning, and Visual Reconnaissance.
+*   **🧩 Modular Architecture:** Built with extensibility in mind. Easily add or modify modules (located in `Modules/`).
+*   **⏯️ Runtime Control:** Full control over the execution flow. **Pause**, **Resume**, **Skip**, or **Quit** steps in real-time.
+*   **📦 Automated Dependencies:** Smart detection system that checks for and installs missing external tools (Nmap, Amass, Subfinder, etc.).
+*   **📊 Professional Reporting:** Generates beautiful, interactive HTML reports with detailed findings and visualizations.
+*   **📂 Batch Processing:** Support for file inputs (`@targets.txt`) to process multiple domains in a single run.
 
-Create and activate a virtual environment, then install dependencies:
+## 🛠️ Integrated Tools
 
-```powershell
-gitclone https://github.com/instroyer/VAJRA.git
+| Tool | Purpose |
+| :--- | :--- |
+| **Whois** | Domain registration intelligence & ownership details. |
+| **Dig** | DNS Record enumeration (A, MX, NS, TXT, SOA). |
+| **Subfinder** | Fast passive subdomain enumeration. |
+| **Amass** | Deep, comprehensive subdomain mapping. |
+| **HTTPX-Toolkit** | Active probing to identify live web servers. |
+| **Nmap** | Advanced port scanning & service version detection. |
+| **Eyewitness** | Visual reconnaissance (Automated Screenshots). |
+
+## 📥 Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/KESTREL.git
+
+# Navigate to the directory
+cd KESTREL
+
+# Install Python dependencies
+pip install -r requirements.txt
 ```
 
-## Usage
+> **Note:** KESTREL will automatically attempt to install external tools (like Subfinder, Amass) if they are missing from your system path.
 
-Start the tool from the repository root:
+## ⚡ Usage
 
-```powershell
-python3 vajra.py
+Simply run the main script to start the interactive wizard:
+
+```bash
+python3 kestrel.py
 ```
 
-The application provides an interactive menu (see `Engine/menu.py`) to run modules and collect results. Configuration is read from `config.py`.
+### 🎯 Scan Modes
 
-## Modules
+| Mode | Description |
+| :--- | :--- |
+| **0. Run All** | 🚀 **Recommended.** Executes the full pipeline (Whois -> Subdomains -> Live Check -> Port Scan -> Screenshot). |
+| **1. Whois** | Basic domain registration info. |
+| **2. Dig** | DNS record analysis (A, MX, NS, TXT). |
+| **3. Subfinder** | Passive subdomain gathering only. |
+| **4. Amass** | Deep subdomain enumeration only. |
+| **5. HTTPX-Toolkit** | Check for live web servers. |
+| **6. Nmap** | Network mapping with various intensity levels. |
+| **7. Screenshot** | Visual evidence capture. |
 
-The `Modules/` folder contains integration wrappers for common recon tools and scanners. Example modules included:
+## 💡 Interactive Help Menu
 
+<<<<<<< HEAD
+KESTREL has a built-in help system (`000`) and a runtime controller (`00`) to manage your scans dynamically.
+
+### 🎮 Runtime Control (New!)
+While a scan is running, you can pause, resume, or skip modules without killing the entire process.
+=======
 - `whois` — domain WHOIS lookups.
 - `amass` — subdomain enumeration via Amass.
 - `subfinder` — subdomain finding.
@@ -48,24 +99,33 @@ The `Modules/` folder contains integration wrappers for common recon tools and s
 - `screenshot` — webpage screenshotting.
 
 Each module is designed for orchestration logic.
+>>>>>>> 6f43303beea856ad680ff4d7a5b606bf3e9e1298
 
-## Results & Reports
+1.  **Trigger:** Type `00` and hit **ENTER** while a module is running.
+2.  **Actions:**
+    *   `p` → **Pause** the current module.
+    *   `r` → **Resume** the paused module.
+    *   `s` → **Skip** the current module (moves to the next one).
+    *   `q` → **Quit** KESTREL entirely.
 
-Scan outputs are written to the `Results/` directory. The engine includes reporting utilities in `Engine/report.py` and `Engine/finaljson.py` for generating structured outputs.
+### ⌨️ Input Formats
+KESTREL supports various target inputs:
+*   **Domain:** `target.com`
+*   **Subdomain:** `sub.target.com`
+*   **IP Address:** `192.168.1.1`
+*   **CIDR Range:** `192.168.1.0/24`
+*   **File Input:** `@list.txt` (Reads targets line-by-line)
 
-## Contributing
+### 🧩 Module Selection
+You can run a single module, a combination, or the full suite:
+*   `0` : Run everything.
+*   `1` : Run only Whois.
+*   `1 2 5` : Run Whois, Dig, and HTTPX in order.
+*   `000` : View the full **Help Menu** inside the tool.
 
-Contributions are welcome. Please fork the repository, create a branch for your feature or bugfix, and open a pull request.
+## ⚠️ Disclaimer
 
-Suggested small improvements:
-- Add unit tests for core Engine functions.
-- Add clearer CLI flags (non-interactive runs).
+This tool is created for **educational purposes** and **authorized security testing** only. The developers are not responsible for any misuse or damage caused by this tool. Always obtain proper authorization before scanning any network.
 
-## License
-
-This project is provided under the MIT License. (Add your LICENSE file as needed.)
-
-## Notes
-
-- This README is a lightweight overview. For module-specific usage, inspect the corresponding files in `Modules/` and the engine code in `Engine/`.
-- If a module requires external binaries (e.g., `amass`, `nmap`), ensure they are installed and available on your PATH.
+---
+<p align="center">Made with ❤️ for Red Teams</p>

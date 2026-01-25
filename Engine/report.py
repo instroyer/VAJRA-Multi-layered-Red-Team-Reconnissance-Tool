@@ -1,4 +1,4 @@
-# VAJRA/Engine/report.py
+# KESTREL/Engine/report.py
 # Description: Generates the final, fully-styled HTML report from the structured final.json file.
 
 import os
@@ -43,13 +43,16 @@ class ReportGenerator:
         if 'whois' in self.data and ('1' in self.module_choices or '0' in self.module_choices):
             body_sections.append(self._generate_whois_section())
         
-        if 'subdomains' in self.data and ('4' in self.module_choices or '0' in self.module_choices):
+        if 'dns' in self.data and ('2' in self.module_choices or '0' in self.module_choices):
+            body_sections.append(self._generate_dns_section())
+        
+        if 'subdomains' in self.data and ('3' in self.module_choices or '0' in self.module_choices):
             body_sections.append(self._generate_subdomain_section())
             
-        if 'services' in self.data and ('4' in self.module_choices or '0' in self.module_choices):
+        if 'services' in self.data and ('5' in self.module_choices or '0' in self.module_choices):
             body_sections.append(self._generate_service_section())
         
-        if 'nmap' in self.data and ('5' in self.module_choices or '0' in self.module_choices):
+        if 'nmap' in self.data and ('6' in self.module_choices or '0' in self.module_choices):
               body_sections.append(self._generate_nmap_section())
         
         # Add recommendations if more than just Whois was run
@@ -96,8 +99,8 @@ class ReportGenerator:
         <div class="header">
             <div class="header-top">
                 <div>
-                    <div class="vajra-title">VAJRA</div>
-                    <div class="vajra-subtitle">Multi-layered Red Team Reconnaissance Framework</div>
+                    <div class="kestrel-title">KESTREL</div>
+                    <div class="kestrel-subtitle">Multi-layered Reconnaissance Tool</div>
                 </div>
             </div>
             <div class="report-title">Comprehensive Security Assessment Report</div>
@@ -130,7 +133,7 @@ class ReportGenerator:
             <div class="section-content">
                 <div class="code-block">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <code>This report summarizes the findings from the reconnaissance scan performed by the VAJRA framework.</code>
+                    <code>This report summarizes the findings from the reconnaissance scan performed by the KESTREL framework.</code>
                 </div>
             </div>
         </div>
@@ -157,6 +160,34 @@ class ReportGenerator:
                         <tr><td><strong>DNSSEC Status</strong></td><td>{whois.get('dnssec_status', 'N/A')}</td></tr>
                         <tr><td><strong>Registrant Org</strong></td><td>{whois.get('registrant_organization', 'N/A')}</td></tr>
                         <tr><td><strong>Registrant Country</strong></td><td>{whois.get('registrant_country', 'N/A')}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        """
+
+    def _generate_dns_section(self):
+        dns_data = self.data.get('dns', {})
+        if not dns_data:
+            return ""
+
+        rows_html = ""
+        for rtype, records in dns_data.items():
+            if records:
+                 content = "<ul>" + "".join(f"<li>{r}</li>" for r in records) + "</ul>"
+                 rows_html += f"<tr><td><strong>{rtype}</strong></td><td>{content}</td></tr>"
+
+        return f"""
+        <div class="section dns" id="dns-records">
+            <h2 class="section-header">
+                <div><i class="fas fa-network-wired"></i> DNS Records</div>
+                <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+             <div class="section-content">
+                <div style="position: relative;">
+                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
+                    <table class="compact-table">
+                         <tbody>{rows_html}</tbody>
                     </table>
                 </div>
             </div>
@@ -258,7 +289,6 @@ class ReportGenerator:
             <div class="section-content">
                 <div class="code-block"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>Priority Actions: Review all findings and prioritize remediation based on risk.</code></div>
                  <div style="position: relative;">
-                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
                     <table class="compact-table">
                         <thead><tr><th>Priority</th><th>Recommendation</th><th>Timeline</th></tr></thead>
                         <tbody>
@@ -287,7 +317,7 @@ class ReportGenerator:
     def _generate_footer(self):
         return """
         <div class="footer">
-            <p><strong>Generated by VAJRA Framework - Multi-layered Red Team Reconnaissance Framework</strong></p>
+            <p><strong>Generated by KESTREL Framework - Multi-layered Reconnaissance Tool</strong></p>
             <p>Owner: Yash Javiya | Penetration Tester</p>
             <div class="contact-info">
                 <a href="mailto:yashjaviya1111@gmail.com" class="contact-link"><i class="fas fa-envelope"></i> Email</a>
@@ -306,7 +336,7 @@ class ReportGenerator:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VAJRA Security Report - {self.target}</title>
+    <title>KESTREL Security Report - {self.target}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -318,6 +348,7 @@ class ReportGenerator:
             --header-gradient: linear-gradient(135deg, #fdbb2d, #b21f1f, #1a2a6c);
             --executive-bg: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
             --domain-bg: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            --dns-bg: linear-gradient(135deg, #e2e3e5 0%, #d6d8d9 100%);
             --subdomain-bg: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
             --service-bg: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
             --network-bg: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
@@ -330,7 +361,7 @@ class ReportGenerator:
         .fixed-header {{ position: fixed; top: 0; left: 0; right: 0; background: var(--header-gradient); padding: 15px 20px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: all 0.3s ease; backdrop-filter: blur(10px); }}
         .fixed-header.small {{ padding: 10px 20px; }}
         .fixed-header-title {{ display: flex; align-items: center; gap: 15px; width: 100%; justify-content: center; }}
-        .fixed-vajra {{ background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; animation: rainbow 8s ease-in-out infinite; }}
+        .fixed-kestrel {{ background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; animation: rainbow 8s ease-in-out infinite; }}
         .fixed-subtitle {{ color: white; font-size: 0.9em; opacity: 0.9; display: none; }}
         .fixed-header.small .fixed-subtitle {{ display: block; }}
         .menu-toggle {{ background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.3s ease; position: absolute; left: 20px; }}
@@ -341,9 +372,9 @@ class ReportGenerator:
         .nav-item:hover {{ background: rgba(255,255,255,0.2); transform: translateX(-5px) scale(1.03); }}
         .nav-item i {{ font-size: 1.2em; width: 25px; text-align: center; }}
         .header {{ background: rgba(255,255,255,0.98); padding: 30px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); margin: 80px 0 30px 0; text-align: center; border: 1px solid rgba(0,0,0,0.1); }}
-        .vajra-title {{ background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5em; font-weight: 800; text-transform: uppercase; animation: rainbow 8s ease-in-out infinite; }}
+        .kestrel-title {{ background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5em; font-weight: 800; text-transform: uppercase; animation: rainbow 8s ease-in-out infinite; }}
         @keyframes rainbow {{ 0%{{background-position:0% 50%}} 50%{{background-position:100% 50%}} 100%{{background-position:0% 50%}} }}
-        .vajra-subtitle {{ color: var(--primary); font-size: 1.2em; font-weight: 600; margin-top: 5px; }}
+        .kestrel-subtitle {{ color: var(--primary); font-size: 1.2em; font-weight: 600; margin-top: 5px; }}
         .report-title {{ color: var(--secondary); font-size: 2.2em; margin: 10px 0 15px 0; padding-top: 15px; border-top: 3px solid var(--accent); font-weight: 700; }}
         .scan-info {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }}
         .info-item {{ padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: #fff; cursor: pointer; position: relative; transition: transform 0.3s ease; }}
@@ -357,6 +388,7 @@ class ReportGenerator:
         .info-item p {{ font-size: 1em; font-weight: 600; }}
         .section {{ background: rgba(255,255,255,0.97); padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 25px; border-left: 5px solid; }}
         .section.executive {{ background: var(--executive-bg); border-left-color: #ffc107; }} .section.domain {{ background: var(--domain-bg); border-left-color: #28a745; }}
+        .section.dns {{ background: var(--dns-bg); border-left-color: #6c757d; }}
         .section.subdomain {{ background: var(--subdomain-bg); border-left-color: #007bff; }} .section.service {{ background: var(--service-bg); border-left-color: #17a2b8; }}
         .section.network {{ background: var(--network-bg); border-left-color: #dc3545; }} .section.security {{ background: var(--security-bg); border-left-color: #6c757d; }}
         .section-header {{ display: flex; align-items: center; justify-content: space-between; font-size: 1.8em; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--accent); color: var(--primary); }}
@@ -406,7 +438,7 @@ class ReportGenerator:
                 padding: 15px;
                 border-radius: 0 !important;
             }}
-            .vajra-title {{ font-size: 2.5em; -webkit-text-fill-color: var(--primary); background: none; animation: none; }}
+            .kestrel-title {{ font-size: 2.5em; -webkit-text-fill-color: var(--primary); background: none; animation: none; }}
             .report-title {{ font-size: 1.8em; }}
             .section-header {{ font-size: 1.5em; padding-bottom: 8px; margin-bottom: 15px; }}
             .scan-info {{ grid-template-columns: repeat(3, 1fr); }}
@@ -426,8 +458,8 @@ class ReportGenerator:
 <body>
     <div class="fixed-header" id="fixedHeader">
         <div class="fixed-header-title">
-            <div class="fixed-vajra">VAJRA</div>
-            <div class="fixed-subtitle">Multi-layered Red Team Reconnaissance Framework</div>
+            <div class="fixed-kestrel">KESTREL</div>
+            <div class="fixed-subtitle">Multi-layered Reconnaissance Tool</div>
         </div>
         <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
     </div>
@@ -435,6 +467,7 @@ class ReportGenerator:
         <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
         <div class="nav-item" onclick="scrollToSection('executive-summary')"><i class="fas fa-chart-line"></i> Executive Summary</div>
         <div class="nav-item" onclick="scrollToSection('domain-analysis')"><i class="fas fa-globe"></i> Domain Analysis</div>
+        <div class="nav-item" onclick="scrollToSection('dns-records')"><i class="fas fa-network-wired"></i> DNS Records</div>
         <div class="nav-item" onclick="scrollToSection('subdomain-mapping')"><i class="fas fa-sitemap"></i> Subdomain Mapping</div>
         <div class="nav-item" onclick="scrollToSection('service-discovery')"><i class="fas fa-heartbeat"></i> Service Discovery</div>
         <div class="nav-item" onclick="scrollToSection('network-analysis')"><i class="fas fa-network-wired"></i> Network Analysis</div>

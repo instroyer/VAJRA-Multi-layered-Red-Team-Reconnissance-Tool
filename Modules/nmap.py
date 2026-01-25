@@ -1,4 +1,4 @@
-# VAJRA/Modules/nmap.py
+# KESTREL/Modules/nmap.py
 # Nmap module execution with integrated submenu and auto mode support
 
 import subprocess
@@ -109,12 +109,29 @@ def run(target, output_dir, runtime_control=None, is_auto_mode=False):
     command = commands.get(scan_type)
     out_n, out_x = out_paths.get(scan_type)
 
-    command.extend(["-oN", out_n, "-oX", out_x])
+    # Check for alive.txt to perform bulk scanning
+    alive_file = os.path.join(logs_dir, "alive.txt")
+    
+    # We create a new list for the command to avoid modifying the template in the dict
+    final_command = list(command) 
+    
+    if os.path.exists(alive_file) and os.path.getsize(alive_file) > 0:
+        info(f"Found alive.txt. Scanning multiple targets from list...")
+        # Replace the single 'target' argument with input list argument
+        # The template is ["nmap", target, ...]. We need to remove 'target' and add '-iL', 'file'
+        if target in final_command:
+            final_command.remove(target)
+        
+        final_command.extend(["-iL", alive_file])
+    else:
+        info(f"Scanning single target: {target}")
+
+    final_command.extend(["-oN", out_n, "-oX", out_x])
 
     try:
-        info(f"Running: {' '.join(command)}")
+        info(f"Running: {' '.join(final_command)}")
         
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(final_command, capture_output=True, text=True)
 
         if result.returncode == 0:
             info(f"Nmap {scan_type} scan completed.")

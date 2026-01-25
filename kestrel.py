@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VAJRA - Multi-layered Red Team Reconnaissance Framework Main Entry Point / Orchestrator
+# KESTREL - Multi-layered Reconnaissance Tool
 import sys
 import os
 import time
@@ -112,7 +112,7 @@ def process_targets(targets, module_choices, report_enabled, is_file_input=False
         if is_file_input and targets.index(target) < len(targets) - 1:
             info("Moving to next target...")
 def main():
-    """Main orchestration function for VAJRA."""
+    """Main orchestration function for KESTREL."""
     try:
         # Display the banner
         display_banner()
@@ -159,14 +159,12 @@ def main():
                 elif module_choices == '6': # Eyewitness only - skip report prompt
                     report_enabled = False
                 
-
                 else:
                     # Get the set of modules the user actually chose
                     chosen_modules = set(module_choices.split())
                     
                     # Define modules that *do* need this prompt (they create report data)
                     prompt_worthy_modules = {'0', '1', '4'}
-
                     if any(c in prompt_worthy_modules for c in chosen_modules):
                         try:
                             generate_report = get_input("\nDo you want to generate a report for this? (y/n)> ").strip().lower()
@@ -178,17 +176,16 @@ def main():
                         # User selected modules that don't go in the report (e.g., '2', '3', '2 3')
                         report_enabled = False
                 # --- END OF LOGIC CHANGE ---
-
                 process_targets(targets, module_choices, report_enabled, is_file_input, file_name)
                 break # Break out of module selection loop after processing
             
             try:
                 new_target = get_input("\nScan new targets? (y/n) > ").strip().lower()
                 if new_target != 'y':
-                    success("Thank you for using VAJRA. Exiting.")
+                    success("Thank you for using KESTREL. Exiting.")
                     break # Break out of main program loop
             except KeyboardInterrupt:
-                success("Thank you for using VAJRA. Exiting.")
+                success("Thank you for using KESTREL. Exiting.")
                 break # Break out of main program loop
             
     except KeyboardInterrupt:

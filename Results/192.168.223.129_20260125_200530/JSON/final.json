@@ -1,19 +1,59 @@
 {
     "scan_info": {
-        "target": "192.168.190.165",
-        "scan_date": "2025-11-05 23:10:01",
+        "target": "192.168.223.129",
+        "scan_date": "2026-01-25 20:06:30",
         "risk_level": "N/A"
     },
+    "whois": {
+        "domain_name": "N/A",
+        "registrar": "N/A",
+        "registrar_url": "N/A",
+        "creation_date": "N/A",
+        "updated_date": "N/A",
+        "expiration_date": "N/A",
+        "name_servers": [
+            "N/A"
+        ],
+        "dnssec_status": "N/A",
+        "registrant_organization": "N/A",
+        "registrant_country": "N/A",
+        "registrant_email": "N/A",
+        "registrant_phone": "N/A",
+        "registrar_abuse_email": "N/A",
+        "registrar_abuse_phone": "N/A"
+    },
+    "dns": {
+        "A": [],
+        "AAAA": [],
+        "MX": [],
+        "NS": [],
+        "TXT": [],
+        "SOA": []
+    },
+    "subdomains": {
+        "total_alive": 1,
+        "subdomains": [
+            "192.168.223.129:80"
+        ]
+    },
+    "services": [
+        {
+            "url": "http://192.168.223.129:80",
+            "host": "192.168.223.129",
+            "port": "80",
+            "webserver": "Apache/2.2.8 (Ubuntu) DAV/2"
+        }
+    ],
     "nmap": {
         "scan_summary": {
             "scan_type": "SYN",
-            "duration": "Wed Nov  5 23:10:01 2025",
-            "total_open_ports": 30
+            "duration": "Sun Jan 25 20:06:27 2026",
+            "total_open_ports": 23
         },
         "hosts": [
             {
-                "hostname": "192.168.190.165",
-                "ip_address": "192.168.190.165",
+                "hostname": "192.168.223.129",
+                "ip_address": "192.168.223.129",
                 "open_ports": [
                     {
                         "port_id": "21",
@@ -89,7 +129,7 @@
                         "port_id": "513",
                         "protocol": "tcp",
                         "service_name": "login",
-                        "service_version": "N/A",
+                        "service_version": "OpenBSD or Solaris rlogind",
                         "recommendation": "Review service configuration for security best practices."
                     },
                     {
@@ -135,13 +175,6 @@
                         "recommendation": "Review service configuration for security best practices."
                     },
                     {
-                        "port_id": "3632",
-                        "protocol": "tcp",
-                        "service_name": "distccd",
-                        "service_version": "distccd v1 (GNU) 4.2.4 (Ubuntu 4.2.4-1ubuntu4)",
-                        "recommendation": "Review service configuration for security best practices."
-                    },
-                    {
                         "port_id": "5432",
                         "protocol": "tcp",
                         "service_name": "postgresql",
@@ -170,13 +203,6 @@
                         "recommendation": "Review service configuration for security best practices."
                     },
                     {
-                        "port_id": "6697",
-                        "protocol": "tcp",
-                        "service_name": "irc",
-                        "service_version": "UnrealIRCd",
-                        "recommendation": "Review service configuration for security best practices."
-                    },
-                    {
                         "port_id": "8009",
                         "protocol": "tcp",
                         "service_name": "ajp13",
@@ -188,41 +214,6 @@
                         "protocol": "tcp",
                         "service_name": "http",
                         "service_version": "Apache Tomcat/Coyote JSP engine 1.1",
-                        "recommendation": "Review service configuration for security best practices."
-                    },
-                    {
-                        "port_id": "8787",
-                        "protocol": "tcp",
-                        "service_name": "drb",
-                        "service_version": "Ruby DRb RMI Ruby 1.8; path /usr/lib/ruby/1.8/drb",
-                        "recommendation": "Review service configuration for security best practices."
-                    },
-                    {
-                        "port_id": "38958",
-                        "protocol": "tcp",
-                        "service_name": "nlockmgr",
-                        "service_version": "1-4 RPC #100021",
-                        "recommendation": "Review service configuration for security best practices."
-                    },
-                    {
-                        "port_id": "46018",
-                        "protocol": "tcp",
-                        "service_name": "java-rmi",
-                        "service_version": "GNU Classpath grmiregistry",
-                        "recommendation": "Review service configuration for security best practices."
-                    },
-                    {
-                        "port_id": "46743",
-                        "protocol": "tcp",
-                        "service_name": "mountd",
-                        "service_version": "1-3 RPC #100005",
-                        "recommendation": "Review service configuration for security best practices."
-                    },
-                    {
-                        "port_id": "48661",
-                        "protocol": "tcp",
-                        "service_name": "status",
-                        "service_version": "1 RPC #100024",
                         "recommendation": "Review service configuration for security best practices."
                     }
                 ]

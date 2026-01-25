@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VAJRA Security Report - acunetix.com</title>
+    <title>KESTREL Security Report - 192.168.223.129</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -16,6 +16,7 @@
             --header-gradient: linear-gradient(135deg, #fdbb2d, #b21f1f, #1a2a6c);
             --executive-bg: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
             --domain-bg: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            --dns-bg: linear-gradient(135deg, #e2e3e5 0%, #d6d8d9 100%);
             --subdomain-bg: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
             --service-bg: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
             --network-bg: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
@@ -28,7 +29,7 @@
         .fixed-header { position: fixed; top: 0; left: 0; right: 0; background: var(--header-gradient); padding: 15px 20px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: all 0.3s ease; backdrop-filter: blur(10px); }
         .fixed-header.small { padding: 10px 20px; }
         .fixed-header-title { display: flex; align-items: center; gap: 15px; width: 100%; justify-content: center; }
-        .fixed-vajra { background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; animation: rainbow 8s ease-in-out infinite; }
+        .fixed-kestrel { background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.8em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; animation: rainbow 8s ease-in-out infinite; }
         .fixed-subtitle { color: white; font-size: 0.9em; opacity: 0.9; display: none; }
         .fixed-header.small .fixed-subtitle { display: block; }
         .menu-toggle { background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.3s ease; position: absolute; left: 20px; }
@@ -39,9 +40,9 @@
         .nav-item:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px) scale(1.03); }
         .nav-item i { font-size: 1.2em; width: 25px; text-align: center; }
         .header { background: rgba(255,255,255,0.98); padding: 30px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); margin: 80px 0 30px 0; text-align: center; border: 1px solid rgba(0,0,0,0.1); }
-        .vajra-title { background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5em; font-weight: 800; text-transform: uppercase; animation: rainbow 8s ease-in-out infinite; }
+        .kestrel-title { background: linear-gradient(45deg, #ff6b6b, #ee5a24, #f39c12, #27ae60, #3498db, #9b59b6, #ff6b6b); background-size: 400% 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5em; font-weight: 800; text-transform: uppercase; animation: rainbow 8s ease-in-out infinite; }
         @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-        .vajra-subtitle { color: var(--primary); font-size: 1.2em; font-weight: 600; margin-top: 5px; }
+        .kestrel-subtitle { color: var(--primary); font-size: 1.2em; font-weight: 600; margin-top: 5px; }
         .report-title { color: var(--secondary); font-size: 2.2em; margin: 10px 0 15px 0; padding-top: 15px; border-top: 3px solid var(--accent); font-weight: 700; }
         .scan-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
         .info-item { padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: #fff; cursor: pointer; position: relative; transition: transform 0.3s ease; }
@@ -55,6 +56,7 @@
         .info-item p { font-size: 1em; font-weight: 600; }
         .section { background: rgba(255,255,255,0.97); padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 25px; border-left: 5px solid; }
         .section.executive { background: var(--executive-bg); border-left-color: #ffc107; } .section.domain { background: var(--domain-bg); border-left-color: #28a745; }
+        .section.dns { background: var(--dns-bg); border-left-color: #6c757d; }
         .section.subdomain { background: var(--subdomain-bg); border-left-color: #007bff; } .section.service { background: var(--service-bg); border-left-color: #17a2b8; }
         .section.network { background: var(--network-bg); border-left-color: #dc3545; } .section.security { background: var(--security-bg); border-left-color: #6c757d; }
         .section-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.8em; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--accent); color: var(--primary); }
@@ -104,7 +106,7 @@
                 padding: 15px;
                 border-radius: 0 !important;
             }
-            .vajra-title { font-size: 2.5em; -webkit-text-fill-color: var(--primary); background: none; animation: none; }
+            .kestrel-title { font-size: 2.5em; -webkit-text-fill-color: var(--primary); background: none; animation: none; }
             .report-title { font-size: 1.8em; }
             .section-header { font-size: 1.5em; padding-bottom: 8px; margin-bottom: 15px; }
             .scan-info { grid-template-columns: repeat(3, 1fr); }
@@ -124,8 +126,8 @@
 <body>
     <div class="fixed-header" id="fixedHeader">
         <div class="fixed-header-title">
-            <div class="fixed-vajra">VAJRA</div>
-            <div class="fixed-subtitle">Multi-layered Red Team Reconnaissance Framework</div>
+            <div class="fixed-kestrel">KESTREL</div>
+            <div class="fixed-subtitle">Multi-layered Reconnaissance Tool</div>
         </div>
         <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
     </div>
@@ -133,6 +135,7 @@
         <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
         <div class="nav-item" onclick="scrollToSection('executive-summary')"><i class="fas fa-chart-line"></i> Executive Summary</div>
         <div class="nav-item" onclick="scrollToSection('domain-analysis')"><i class="fas fa-globe"></i> Domain Analysis</div>
+        <div class="nav-item" onclick="scrollToSection('dns-records')"><i class="fas fa-network-wired"></i> DNS Records</div>
         <div class="nav-item" onclick="scrollToSection('subdomain-mapping')"><i class="fas fa-sitemap"></i> Subdomain Mapping</div>
         <div class="nav-item" onclick="scrollToSection('service-discovery')"><i class="fas fa-heartbeat"></i> Service Discovery</div>
         <div class="nav-item" onclick="scrollToSection('network-analysis')"><i class="fas fa-network-wired"></i> Network Analysis</div>
@@ -144,20 +147,20 @@
         <div class="header">
             <div class="header-top">
                 <div>
-                    <div class="vajra-title">VAJRA</div>
-                    <div class="vajra-subtitle">Multi-layered Red Team Reconnaissance Framework</div>
+                    <div class="kestrel-title">KESTREL</div>
+                    <div class="kestrel-subtitle">Multi-layered Reconnaissance Tool</div>
                 </div>
             </div>
             <div class="report-title">Comprehensive Security Assessment Report</div>
             <div class="scan-info">
-                <div class="info-item target" onclick="copyToClipboard('acunetix.com')">
+                <div class="info-item target" onclick="copyToClipboard('192.168.223.129')">
                     <span class="copy-badge"><i class="fas fa-copy"></i></span>
                     <h3><i class="fas fa-bullseye"></i> Target</h3>
-                    <p>acunetix.com</p>
+                    <p>192.168.223.129</p>
                 </div>
                 <div class="info-item date">
                     <h3><i class="fas fa-calendar-alt"></i> Scan Date</h3>
-                    <p id="scanDateDisplay">2025-11-07 23:19:51</p>
+                    <p id="scanDateDisplay">2026-01-25 20:06:30</p>
                 </div>
                 <div class="info-item risk">
                     <h3><i class="fas fa-shield-alt"></i> Risk Level</h3>
@@ -175,11 +178,88 @@
             <div class="section-content">
                 <div class="code-block">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <code>This report summarizes the findings from the reconnaissance scan performed by the VAJRA framework.</code>
+                    <code>This report summarizes the findings from the reconnaissance scan performed by the KESTREL framework.</code>
                 </div>
             </div>
         </div>
         
+        
+        <div class="section domain" id="domain-analysis">
+            <h2 class="section-header">
+                <div><i class="fas fa-globe"></i> Domain Registration Analysis</div>
+                <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+            <div class="section-content">
+                <div style="position: relative;">
+                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
+                    <table class="compact-table">
+                        <tr><td><strong>Domain Name</strong></td><td>N/A</td></tr>
+                        <tr><td><strong>Registrar</strong></td><td>N/A</td></tr>
+                        <tr><td><strong>Creation Date</strong></td><td>N/A</td></tr>
+                        <tr><td><strong>Expiration Date</strong></td><td>N/A</td></tr>
+                        <tr><td><strong>Name Servers</strong></td><td><ul><li>N/A</li></ul></td></tr>
+                        <tr><td><strong>DNSSEC Status</strong></td><td>N/A</td></tr>
+                        <tr><td><strong>Registrant Org</strong></td><td>N/A</td></tr>
+                        <tr><td><strong>Registrant Country</strong></td><td>N/A</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section dns" id="dns-records">
+            <h2 class="section-header">
+                <div><i class="fas fa-network-wired"></i> DNS Records</div>
+                <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+             <div class="section-content">
+                <div style="position: relative;">
+                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
+                    <table class="compact-table">
+                         <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section subdomain" id="subdomain-mapping">
+            <h2 class="section-header">
+                <div><i class="fas fa-sitemap"></i> Subdomain Infrastructure Mapping</div>
+                <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+            <div class="section-content">
+                <div class="code-block"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>Total Alive Subdomains: 1</code></div>
+                <div style="position: relative;">
+                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
+                    <table class="compact-table">
+                        <thead><tr><th>Alive Subdomains</th></tr></thead>
+                        <tbody><tr><td>192.168.223.129:80</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section service" id="service-discovery">
+            <h2 class="section-header">
+                <div><i class="fas fa-heartbeat"></i> Service Discovery & Availability</div>
+                <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
+            </h2>
+            <div class="section-content">
+                 <div style="position: relative;">
+                    <button class="table-copy" onclick="copyTable(this)">Copy Table</button>
+                    <table class="compact-table">
+                        <thead><tr><th>URL</th><th>Host</th><th>Port</th><th>Web Server</th></tr></thead>
+                        <tbody>
+            <tr>
+                <td><a href="http://192.168.223.129:80" target="_blank">http://192.168.223.129:80</a></td>
+                <td>192.168.223.129</td>
+                <td>80</td>
+                <td>Apache/2.2.8 (Ubuntu) DAV/2</td>
+            </tr>
+            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         
         <div class="section network" id="network-analysis">
             <h2 class="section-header">
@@ -187,12 +267,111 @@
                 <button class="toggle-btn" onclick="toggleSection(this)"><i class="fas fa-chevron-up"></i></button>
             </h2>
             <div class="section-content">
-                <div class="code-block"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>Scan Type: SYN | Total Open Ports: 4</code></div>
-                <div class='url-header'>acunetix.com (104.18.11.224)</div><div class='service-grid'>
+                <div class="code-block"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>Scan Type: SYN | Total Open Ports: 23</code></div>
+                <div class='url-header'>192.168.223.129 (192.168.223.129)</div><div class='service-grid'>
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 21/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">FTP</span>
+                    </div>
+                    <div class="service-details">vsftpd 2.3.4</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 22/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">SSH</span>
+                    </div>
+                    <div class="service-details">OpenSSH 4.7p1 Debian 8ubuntu1 protocol 2.0</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Ensure strong password policies and disable root login.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 23/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">TELNET</span>
+                    </div>
+                    <div class="service-details">Linux telnetd</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Telnet is insecure. Disable and use SSH instead.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 25/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">SMTP</span>
+                    </div>
+                    <div class="service-details">Postfix smtpd</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 53/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">DOMAIN</span>
+                    </div>
+                    <div class="service-details">ISC BIND 9.4.2</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
                 <div class="service-item">
                     <div class="service-header">
                         <span class="service-port">Port 80/tcp</span>
-                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                        <span style="color: var(--accent); font-weight: 600;">HTTP</span>
+                    </div>
+                    <div class="service-details">Apache httpd 2.2.8 (Ubuntu) DAV/2</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Unencrypted traffic. Redirect all HTTP traffic to HTTPS.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 111/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">RPCBIND</span>
+                    </div>
+                    <div class="service-details">2 RPC #100000</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 139/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">NETBIOS-SSN</span>
+                    </div>
+                    <div class="service-details">Samba smbd 3.X - 4.X workgroup: WORKGROUP</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 445/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">NETBIOS-SSN</span>
+                    </div>
+                    <div class="service-details">Samba smbd 3.X - 4.X workgroup: WORKGROUP</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 512/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">EXEC</span>
+                    </div>
+                    <div class="service-details">netkit-rsh rexecd</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 513/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">LOGIN</span>
+                    </div>
+                    <div class="service-details">OpenBSD or Solaris rlogind</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 514/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">SHELL</span>
                     </div>
                     <div class="service-details">N/A</div>
                     <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
@@ -200,28 +379,100 @@
                 
                 <div class="service-item">
                     <div class="service-header">
-                        <span class="service-port">Port 443/tcp</span>
-                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                        <span class="service-port">Port 1099/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">JAVA-RMI</span>
                     </div>
-                    <div class="service-details">N/A</div>
+                    <div class="service-details">GNU Classpath grmiregistry</div>
                     <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
                 </div>
                 
                 <div class="service-item">
                     <div class="service-header">
-                        <span class="service-port">Port 8080/tcp</span>
-                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                        <span class="service-port">Port 1524/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">BINDSHELL</span>
                     </div>
-                    <div class="service-details">N/A</div>
+                    <div class="service-details">Metasploitable root shell</div>
                     <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
                 </div>
                 
                 <div class="service-item">
                     <div class="service-header">
-                        <span class="service-port">Port 8443/tcp</span>
-                        <span style="color: var(--accent); font-weight: 600;">TCPWRAPPED</span>
+                        <span class="service-port">Port 2049/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">NFS</span>
                     </div>
-                    <div class="service-details">N/A</div>
+                    <div class="service-details">2-4 RPC #100003</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 2121/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">FTP</span>
+                    </div>
+                    <div class="service-details">ProFTPD 1.3.1</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 3306/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">MYSQL</span>
+                    </div>
+                    <div class="service-details">MySQL 5.0.51a-3ubuntu5</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 5432/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">POSTGRESQL</span>
+                    </div>
+                    <div class="service-details">PostgreSQL DB 8.3.0 - 8.3.7</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 5900/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">VNC</span>
+                    </div>
+                    <div class="service-details">VNC protocol 3.3</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 6000/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">X11</span>
+                    </div>
+                    <div class="service-details">access denied</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 6667/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">IRC</span>
+                    </div>
+                    <div class="service-details">UnrealIRCd</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 8009/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">AJP13</span>
+                    </div>
+                    <div class="service-details">Apache Jserv Protocol v1.3</div>
+                    <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-header">
+                        <span class="service-port">Port 8180/tcp</span>
+                        <span style="color: var(--accent); font-weight: 600;">HTTP</span>
+                    </div>
+                    <div class="service-details">Apache Tomcat/Coyote JSP engine 1.1</div>
                     <div class="service-recommendation"><i class="fas fa-exclamation-triangle"></i> Review service configuration for security best practices.</div>
                 </div>
                 </div>
@@ -263,7 +514,7 @@
         
         
         <div class="footer">
-            <p><strong>Generated by VAJRA Framework - Multi-layered Red Team Reconnaissance Framework</strong></p>
+            <p><strong>Generated by KESTREL Framework - Multi-layered Reconnaissance Tool</strong></p>
             <p>Owner: Yash Javiya | Penetration Tester</p>
             <div class="contact-info">
                 <a href="mailto:yashjaviya1111@gmail.com" class="contact-link"><i class="fas fa-envelope"></i> Email</a>

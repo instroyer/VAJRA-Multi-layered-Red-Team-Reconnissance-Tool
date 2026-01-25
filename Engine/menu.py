@@ -1,5 +1,5 @@
 # Engine/menu.py
-# Menu system and input handling for VAJRA
+# Menu system and input handling for KESTREL
 
 from .logger import info, success, warning, error
 import time
@@ -16,15 +16,16 @@ def main_menu(target):
 
     menu_text = f"""  
     {'='*50}  
-    VAJRA Main Menu | Target: {target}  
+    KESTREL Main Menu | Target: {target}  
     {'='*50}  
     [ 0 ] Run All  
     [ 1 ] Whois  
-    [ 2 ] Subfinder  
-    [ 3 ] Amass  
-    [ 4 ] Httpx-toolkit  
-    [ 5 ] Nmap  
-    [ 6 ] Eyewitness (Screenshot)  
+    [ 2 ] Dig (DNS Records)
+    [ 3 ] Subfinder  
+    [ 4 ] Amass  
+    [ 5 ] Httpx-toolkit  
+    [ 6 ] Nmap  
+    [ 7 ] Eyewitness (Screenshot)  
 
     [ 00 ] Runtime Control Menu  
     [ 000 ] Show Help Menu  
@@ -45,10 +46,10 @@ def main_menu(target):
             elif choice:  
                 # Validate multiple choices (e.g., '1 2 4')  
                 choices = choice.split()  
-                if all(c in '123456' for c in choices):  
+                if all(c in '1234567' for c in choices):  
                     return choice  
                 else:  
-                    error("Invalid module selection. Choose from 1-6, separated by spaces.")  
+                    error("Invalid module selection. Choose from 1-7, separated by spaces.")  
                     info("Type '000' for help.")  
             else:  
                 warning("Please enter a choice.")  
@@ -62,7 +63,7 @@ def show_help():
     """Display the help menu with option to return immediately with Enter."""
     help_text = f"""
     {'='*50}
-    [ * ] VAJRA HELP MENU
+    [ * ] KESTREL HELP MENU
     {'='*50}
     [ + ] Module Selection
     [ - ] Target formats supported:
@@ -91,10 +92,8 @@ def show_help():
     [ + ] Runtime Control (during execution)
     [ - ] Trigger: 00 + ENTER
     [ - ] Actions:
-        p → Pause current module
-        r → Resume paused module
         s → Skip current module
-        q → Quit VAJRA entirely
+        q → Quit KESTREL entirely
     [ - ] Any other key → Exit Runtime Menu
 
     [ + ] Notes

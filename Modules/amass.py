@@ -1,4 +1,4 @@
-# VAJRA/Modules/amass.py
+# KESTREL/Modules/amass.py
 # Amass module execution
 import subprocess
 import os
