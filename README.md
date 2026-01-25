@@ -30,7 +30,7 @@
 
 *   **🔍 Multi-Layered Scan:** Seamlessly combines Whois, Subdomain Enumeration, Web Service Discovery, Port Scanning, and Visual Reconnaissance.
 *   **🧩 Modular Architecture:** Built with extensibility in mind. Easily add or modify modules (located in `Modules/`).
-*   **⏯️ Runtime Control:** Full control over the execution flow. **Pause**, **Resume**, **Skip**, or **Quit** steps in real-time.
+*   **⏯️ Runtime Control:** Full control over the execution flow. **Skip** or **Quit** steps in real-time.
 *   **📦 Automated Dependencies:** Smart detection system that checks for and installs missing external tools (Nmap, Amass, Subfinder, etc.).
 *   **📊 Professional Reporting:** Generates beautiful, interactive HTML reports with detailed findings and visualizations.
 *   **📂 Batch Processing:** Support for file inputs (`@targets.txt`) to process multiple domains in a single run.
@@ -85,26 +85,13 @@ python3 kestrel.py
 
 ## 💡 Interactive Help Menu
 
-<<<<<<< HEAD
 KESTREL has a built-in help system (`000`) and a runtime controller (`00`) to manage your scans dynamically.
 
 ### 🎮 Runtime Control (New!)
-While a scan is running, you can pause, resume, or skip modules without killing the entire process.
-=======
-- `whois` — domain WHOIS lookups.
-- `amass` — subdomain enumeration via Amass.
-- `subfinder` — subdomain finding.
-- `nmap` — port/service scanning and OS detection.
-- `httpx` — HTTP probing for responsive hosts.
-- `screenshot` — webpage screenshotting.
-
-Each module is designed for orchestration logic.
->>>>>>> 6f43303beea856ad680ff4d7a5b606bf3e9e1298
+While a scan is running, you can skip modules or quit execution without killing the entire process.
 
 1.  **Trigger:** Type `00` and hit **ENTER** while a module is running.
 2.  **Actions:**
-    *   `p` → **Pause** the current module.
-    *   `r` → **Resume** the paused module.
     *   `s` → **Skip** the current module (moves to the next one).
     *   `q` → **Quit** KESTREL entirely.
 
